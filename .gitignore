@@ -1,5 +1,6 @@
 .cache
 /build/
+/install/
 
 # C++ template from GitHub:
 

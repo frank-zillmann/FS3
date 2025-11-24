@@ -72,12 +72,9 @@ endif()
 
 # EIGEN
 add_subdirectory(external/eigen)
-link_libraries(Eigen3::Eigen)
 
-# CNPY
-add_subdirectory(external/cnpy)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/cnpy)
-link_libraries(cnpy-static)
+# CNPY - EXCLUDE_FROM_ALL prevents installing cnpy's binaries/headers
+add_subdirectory(external/cnpy EXCLUDE_FROM_ALL)
 
 # Configure preprocessor definitions
 if(LOG_ENABLED)
@@ -108,19 +105,26 @@ list(FILTER SRC_FILES EXCLUDE REGEX ".*/(Examples|Experiments|Tests)/.*")
 
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC
-    ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE
+        # CNPY is only used internally in .cpp files
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/cnpy
+)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
-    # ${LAPACK_LIBRARIES}
-    SUNDIALS::arkode
-    SUNDIALS::cvode
-    SUNDIALS::nvecserial
-    # SUNDIALS::sunlinsollapackband
-    SUNDIALS::sunlinsolband
-    # SUNDIALS::sunlinsolklu
-    # SUNDIALS::sunmatrixsparse
-    Eigen3::Eigen
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC
+        # These dependencies are part of FS3's public API
+        SUNDIALS::arkode
+        SUNDIALS::cvode
+        SUNDIALS::nvecserial
+        SUNDIALS::sunlinsolband
+        Eigen3::Eigen
+    PRIVATE
+        # CNPY is only used internally
+        cnpy-static
 )
 
 # Doxygen documentation
@@ -155,3 +159,52 @@ if(BUILD_DOCS)
         message(STATUS "Doxygen not found. Documentation will not be generated.")
     endif()
 endif()
+
+# Install / package support
+include(GNUInstallDirs)
+
+# Install all targets to satisfy CMake export requirements
+# cnpy-static is included in export because FS3 links to it, but since it's PRIVATE
+# and statically linked, consumers don't directly use it
+install(
+    TARGETS ${PROJECT_NAME} eigen cnpy-static
+    EXPORT ${PROJECT_NAME}Targets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+# Install public headers
+install(
+    DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# Export target set for find_package
+install(
+    EXPORT ${PROJECT_NAME}Targets
+    FILE ${PROJECT_NAME}Targets.cmake
+    NAMESPACE ${PROJECT_NAME}::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+
+# Generate config + version files
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
+
+install(
+    FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+)
