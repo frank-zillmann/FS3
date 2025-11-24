@@ -70,6 +70,12 @@ else()
     message(STATUS "SUNDIALS found: ${SUNDIALS_LIBRARIES}")
 endif()
 
+# ZLIB (required by cnpy)
+find_package(ZLIB REQUIRED)
+if (NOT ZLIB_FOUND)
+    message(FATAL_ERROR "ZLIB not found. Please install it.")
+endif()
+
 # EIGEN
 add_subdirectory(external/eigen)
 
@@ -108,10 +114,8 @@ add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/cnpy>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    PRIVATE
-        # CNPY is only used internally in .cpp files
-        ${CMAKE_CURRENT_SOURCE_DIR}/external/cnpy
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -122,9 +126,8 @@ target_link_libraries(${PROJECT_NAME}
         SUNDIALS::nvecserial
         SUNDIALS::sunlinsolband
         Eigen3::Eigen
-    PRIVATE
-        # CNPY is only used internally
         cnpy-static
+        ZLIB::ZLIB
 )
 
 # Doxygen documentation
@@ -177,6 +180,12 @@ install(
 # Install public headers
 install(
     DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# Install cnpy headers (now public)
+install(
+    FILES ${CMAKE_CURRENT_SOURCE_DIR}/external/cnpy/cnpy.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
