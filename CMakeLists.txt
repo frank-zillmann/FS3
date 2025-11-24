@@ -1,7 +1,13 @@
 
 cmake_minimum_required(VERSION 3.16)
+
 set(PROJECT_NAME "FS3")
 project(${PROJECT_NAME} LANGUAGES CXX)
+set(PROJECT_URL "https://github.com/frank-zillmann/FS3")
+set(
+  PROJECT_DESCRIPTION
+  "Fast and Flexible Framework for Simple Simulations of Separation-Processes"
+)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -71,7 +77,7 @@ link_libraries(Eigen3::Eigen)
 # CNPY
 add_subdirectory(external/cnpy)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/external/cnpy)
-link_libraries(cnpy)
+link_libraries(cnpy-static)
 
 # Configure preprocessor definitions
 if(LOG_ENABLED)
@@ -93,8 +99,29 @@ if(OUTPUT_DIR)
     add_compile_definitions(OUTPUT_DIR="${OUTPUT_DIR}")
 endif()
 
-# Add subdirectories
-add_subdirectory(src)
+# Build FS3
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+)
+# Exclude example, experiment and test files
+list(FILTER SRC_FILES EXCLUDE REGEX ".*/(Examples|Experiments|Tests)/.*")
+
+add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+    ${PROJECT_SOURCE_DIR}/include)
+
+target_link_libraries(${PROJECT_NAME} PUBLIC
+    # ${LAPACK_LIBRARIES}
+    SUNDIALS::arkode
+    SUNDIALS::cvode
+    SUNDIALS::nvecserial
+    # SUNDIALS::sunlinsollapackband
+    SUNDIALS::sunlinsolband
+    # SUNDIALS::sunlinsolklu
+    # SUNDIALS::sunmatrixsparse
+    Eigen3::Eigen
+)
 
 # Doxygen documentation
 option(BUILD_DOCS "Build documentation" ON)
