@@ -52,12 +52,6 @@ case "$ACTION" in
         fi
         ;;
     
-    rebuild)
-        echo "Rebuilding documentation..."
-        "$0" clean
-        "$0" generate
-        ;;
-    
     pdf)
         echo "Generating PDF documentation..."
         if [ ! -d "$BUILD_DIR" ]; then
@@ -83,7 +77,6 @@ case "$ACTION" in
         echo "  generate  - Generate Doxygen documentation"
         echo "  open      - Open documentation in default browser"
         echo "  clean     - Remove generated documentation"
-        echo "  rebuild   - Clean and regenerate documentation"
         echo "  pdf       - Generate PDF documentation (requires LaTeX)"
         exit 1
         ;;

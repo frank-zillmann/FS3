@@ -1,4 +1,4 @@
-# Doxyfile for Bachelor Thesis Project
+# Doxyfile for FS3
 # Configured for class diagrams and documentation generation
 
 #---------------------------------------------------------------------------
@@ -94,7 +94,7 @@ TREEVIEW_WIDTH         = 250
 EXT_LINKS_IN_WINDOW    = NO
 
 #---------------------------------------------------------------------------
-# LaTeX output options (for thesis integration)
+# LaTeX output options
 #---------------------------------------------------------------------------
 GENERATE_LATEX         = YES
 LATEX_OUTPUT           = latex
@@ -112,7 +112,7 @@ LATEX_HIDE_INDICES     = NO
 LATEX_SOURCE_CODE      = NO
 
 #---------------------------------------------------------------------------
-# Diagram generation options - CRITICAL for thesis
+# Diagram generation options
 #---------------------------------------------------------------------------
 HAVE_DOT               = YES
 DOT_NUM_THREADS        = 0

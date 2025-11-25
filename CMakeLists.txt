@@ -63,7 +63,7 @@ if(ENABLE_ASAN AND CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 # SUNDIALS
-find_package(SUNDIALS REQUIRED COMPONENTS cvode nvecserial sunlinsolband sunlinsolklu sunmatrixsparse)
+find_package(SUNDIALS REQUIRED COMPONENTS cvode nvecserial sunlinsolband)
 if (NOT SUNDIALS_FOUND)
     message(FATAL_ERROR "SUNDIALS not found. Please install it or set the SUNDIALS_DIR environment variable.")
 else()

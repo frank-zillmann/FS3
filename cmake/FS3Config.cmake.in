@@ -3,7 +3,7 @@
 # Find dependencies that FS3 requires
 include(CMakeFindDependencyMacro)
 
-find_dependency(SUNDIALS REQUIRED COMPONENTS cvode nvecserial sunlinsolband sunlinsolklu sunmatrixsparse)
+find_dependency(SUNDIALS REQUIRED COMPONENTS cvode nvecserial sunlinsolband)
 find_dependency(ZLIB REQUIRED)
 
 include("${CMAKE_CURRENT_LIST_DIR}/FS3Targets.cmake")
