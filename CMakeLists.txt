@@ -82,26 +82,6 @@ add_subdirectory(external/eigen)
 # CNPY - EXCLUDE_FROM_ALL prevents installing cnpy's binaries/headers
 add_subdirectory(external/cnpy EXCLUDE_FROM_ALL)
 
-# Configure preprocessor definitions
-if(LOG_ENABLED)
-    add_compile_definitions(LOG_ENABLED=1)
-else()
-    add_compile_definitions(LOG_ENABLED=0)
-endif()
-
-if(BENCHMARK_ENABLED)
-    add_compile_definitions(BENCHMARK_ENABLED=1)
-else()
-    add_compile_definitions(BENCHMARK_ENABLED=0)
-endif()
-
-add_compile_definitions(LOG_FIRST_N_CALLS=${LOG_FIRST_N_CALLS})
-add_compile_definitions(LOG_EVERY_N_CALLS=${LOG_EVERY_N_CALLS})
-
-if(OUTPUT_DIR)
-    add_compile_definitions(OUTPUT_DIR="${OUTPUT_DIR}")
-endif()
-
 # Build FS3
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
@@ -129,6 +109,26 @@ target_link_libraries(${PROJECT_NAME}
         cnpy-static
         ZLIB::ZLIB
 )
+
+# Configure preprocessor definitions
+if(LOG_ENABLED)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC LOG_ENABLED=1)
+else()
+    target_compile_definitions(${PROJECT_NAME} PUBLIC LOG_ENABLED=0)
+endif()
+
+if(BENCHMARK_ENABLED)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC BENCHMARK_ENABLED=1)
+else()
+    target_compile_definitions(${PROJECT_NAME} PUBLIC BENCHMARK_ENABLED=0)
+endif()
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC LOG_FIRST_N_CALLS=${LOG_FIRST_N_CALLS})
+target_compile_definitions(${PROJECT_NAME} PUBLIC LOG_EVERY_N_CALLS=${LOG_EVERY_N_CALLS})
+
+if(OUTPUT_DIR)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC OUTPUT_DIR="${OUTPUT_DIR}")
+endif()
 
 # Doxygen documentation
 option(BUILD_DOCS "Build documentation" ON)
@@ -183,7 +183,7 @@ install(
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-# Install cnpy headers (now public)
+# Install cnpy headers
 install(
     FILES ${CMAKE_CURRENT_SOURCE_DIR}/external/cnpy/cnpy.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
