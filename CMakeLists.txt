@@ -49,19 +49,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
   message("CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
 endif()
 
-# Option to enable AddressSanitizer
-option(ENABLE_ASAN "Enable AddressSanitizer" ON)
-
-if(ENABLE_ASAN AND CMAKE_BUILD_TYPE STREQUAL "Debug")
-    # Enable comprehensive AddressSanitizer flags
-    set(ASAN_FLAGS "-fsanitize=address -fsanitize=leak -fsanitize=undefined -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${ASAN_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} ${ASAN_FLAGS}")
-
-    message("CMAKE_CXX_FLAGS_DEBUG: ${CMAKE_CXX_FLAGS_DEBUG}")
-    message("CMAKE_EXE_LINKER_FLAGS_DEBUG: ${CMAKE_EXE_LINKER_FLAGS_DEBUG}")
-endif()
-
 # SUNDIALS
 find_package(SUNDIALS REQUIRED COMPONENTS cvode nvecserial sunlinsolband)
 if (NOT SUNDIALS_FOUND)
@@ -90,6 +77,20 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
 list(FILTER SRC_FILES EXCLUDE REGEX ".*/(Examples|Experiments|Tests)/.*")
 
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
+
+# Sanitizer flags: apply after target creation, use PUBLIC for propagation to applications
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(ASAN_FLAGS
+        -fsanitize=address
+        -fsanitize=leak
+        -fsanitize=undefined
+        -fno-omit-frame-pointer
+        -fno-optimize-sibling-calls
+    )
+    target_compile_options(${PROJECT_NAME} PUBLIC $<$<CONFIG:Debug>:${ASAN_FLAGS}>)
+    target_link_options(${PROJECT_NAME} PUBLIC $<$<CONFIG:Debug>:${ASAN_FLAGS}>)
+    message("[FS3] Exporting sanitizer flags for Debug builds (PUBLIC): ${ASAN_FLAGS}")
+endif()
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC

@@ -111,7 +111,6 @@ All options can be passed to the build script:
 **Feature Toggles:**
 - `-DLOG_ENABLED=ON|OFF` - Enable logging functionality (default: ON)
 - `-DBENCHMARK_ENABLED=ON|OFF` - Enable benchmarking functionality (default: ON)
-- `-DENABLE_ASAN=ON|OFF` - Enable AddressSanitizer in Debug builds (default: ON)
 - `-DBUILD_DOCS=ON|OFF` - Generate Doxygen documentation (default: ON if Doxygen found)
 
 **Logging Configuration:**
