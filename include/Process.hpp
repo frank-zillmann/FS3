@@ -3,6 +3,7 @@
 
 #include <sundials/sundials_types.h>
 
+#include <memory>
 #include <vector>
 
 #include "Components/ComponentSystem.hpp"
@@ -21,7 +22,7 @@ class Process {
 
    public:
     Process(const ComponentSystem& componentSystem,
-            const std::initializer_list<UnitOperationBase*> unitOperations,
+            const std::initializer_list<std::shared_ptr<UnitOperationBase>> unitOperations,
             realtype t_end = std::numeric_limits<realtype>::infinity())
         : componentSystem(componentSystem), unitOperations(unitOperations), t_end(t_end) {
         c_inlet_buffer.resize(1, componentSystem.n_components);
@@ -35,7 +36,7 @@ class Process {
 
     void rhs_connections(realtype t, const realtype* y, realtype* dy_dt, const Solver& solver) const;
 
-    const std::vector<UnitOperationBase*>& getUnitOperation_ptrs() const { return unitOperations; }
+    const std::vector<std::shared_ptr<UnitOperationBase>>& getUnitOperations() const { return unitOperations; }
 
    protected:
     // List of all components in the process in the same order as in y
@@ -43,7 +44,7 @@ class Process {
     const ComponentSystem& componentSystem;
 
     // List of all unit operations in the process
-    const std::vector<UnitOperationBase*> unitOperations;
+    const std::vector<std::shared_ptr<UnitOperationBase>> unitOperations;
 
     realtype t_end;  // End time of the process (default: infinity)
 

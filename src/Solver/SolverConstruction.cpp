@@ -35,7 +35,7 @@ Solver::Solver(const Process& process, SolverType solverType)
       sunctx(nullptr) {
     // Fill unitOperationStartIdx with the starting index of each unit operation in the solution vector y
     for (const auto& unitOperation_ptr : process.unitOperations) {
-        unitOperationStartIdx[unitOperation_ptr] = ySize;
+        unitOperationStartIdx[unitOperation_ptr.get()] = ySize;
         LOG("solver_initialization.log", "Unit operation " << static_cast<int>(unitOperation_ptr->getType())
                                                            << " starts at index " << ySize << " with y_size "
                                                            << unitOperation_ptr->y_size() << "\n");
@@ -57,7 +57,7 @@ Solver::Solver(const Process& process, SolverType solverType)
     std::fill(y_data, y_data + ySize, 0.0);  // Zero-initialize first
 
     for (const auto& unitOperation_ptr : process.unitOperations) {
-        auto startIdx = getUnitOperationStartIdx(unitOperation_ptr);
+        auto startIdx = getUnitOperationStartIdx(unitOperation_ptr.get());
         if (unitOperation_ptr->y.size() == 0) {
             // Already zero-initialized above -> do nothing
         } else if (unitOperation_ptr->y.size() == unitOperation_ptr->y_size()) {
@@ -322,7 +322,7 @@ const std::vector<realtype> Solver::getY() const {
 }
 
 std::size_t Solver::getUnitOperationStartIdx(const UnitOperationBase* unitOp) const {
-    auto it = unitOperationStartIdx.find(const_cast<UnitOperationBase*>(unitOp));
+    auto it = unitOperationStartIdx.find(unitOp);
     if (it != unitOperationStartIdx.end()) {
         return it->second;
     }

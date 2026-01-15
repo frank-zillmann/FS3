@@ -46,7 +46,7 @@ int Solver::rhs(realtype t, N_Vector y_sundials, N_Vector dy_dt_sundials, void* 
     std::vector<realtype> t_unitOperations;
     t_unitOperations.reserve(solver->process.unitOperations.size());
     for (auto const& unitOperation_ptr : solver->process.unitOperations) {
-        size_t first_idx = solver->getUnitOperationStartIdx(unitOperation_ptr);
+        size_t first_idx = solver->getUnitOperationStartIdx(unitOperation_ptr.get());
         realtype t_unitOperation = 0.0;
         BENCHMARK(t_unitOperation,
                   { unitOperation_ptr->rhs(t, y + first_idx, dy_dt + first_idx, *solver, true, true, true, true); });
@@ -63,7 +63,7 @@ int Solver::rhs(realtype t, N_Vector y_sundials, N_Vector dy_dt_sundials, void* 
         realtype t_total = std::accumulate(t_unitOperations.begin(), t_unitOperations.end(), 0.0) + t_connections;
         oss << "t=" << t << "\t\tt_total=" << (t_total) << "\t\tt_conncections=" << (t_connections);
         for (size_t i = 0; i < t_unitOperations.size(); ++i) {
-            auto* uo_ptr = solver->process.unitOperations[i];
+            const auto& uo_ptr = solver->process.unitOperations[i];
             oss << "\t\tt_unitOperation[" << i << ",type=" << static_cast<int>(uo_ptr->getType())
                 << "]=" << (t_unitOperations[i]);
         }
@@ -100,7 +100,7 @@ int Solver::rhs_nonStiff(realtype t, N_Vector y_sundials, N_Vector dy_dt_sundial
     std::vector<realtype> t_unitOperations;
     t_unitOperations.reserve(solver->process.unitOperations.size());
     for (auto const& unitOperation_ptr : solver->process.unitOperations) {
-        size_t first_idx = solver->getUnitOperationStartIdx(unitOperation_ptr);
+        size_t first_idx = solver->getUnitOperationStartIdx(unitOperation_ptr.get());
         realtype t_unitOperation = 0.0;
         BENCHMARK(t_unitOperation,
                   { unitOperation_ptr->rhs(t, y + first_idx, dy_dt + first_idx, *solver, false, true, true, true); });
@@ -117,7 +117,7 @@ int Solver::rhs_nonStiff(realtype t, N_Vector y_sundials, N_Vector dy_dt_sundial
         realtype t_total = std::accumulate(t_unitOperations.begin(), t_unitOperations.end(), 0.0) + t_connections;
         oss << "t=" << t << "\t\tt_total=" << (t_total) << "\t\tt_conncections=" << (t_connections);
         for (size_t i = 0; i < t_unitOperations.size(); ++i) {
-            auto* uo_ptr = solver->process.unitOperations[i];
+            const auto& uo_ptr = solver->process.unitOperations[i];
             oss << "\t\tt_unitOperation[" << i << ",type=" << static_cast<int>(uo_ptr->getType())
                 << "]=" << (t_unitOperations[i]);
         }
@@ -154,7 +154,7 @@ int Solver::rhs_stiff(realtype t, N_Vector y_sundials, N_Vector dy_dt_sundials, 
     std::vector<realtype> t_unitOperations;
     t_unitOperations.reserve(solver->process.unitOperations.size());
     for (auto const& unitOperation_ptr : solver->process.unitOperations) {
-        size_t first_idx = solver->getUnitOperationStartIdx(unitOperation_ptr);
+        size_t first_idx = solver->getUnitOperationStartIdx(unitOperation_ptr.get());
         realtype t_unitOperation = 0.0;
         BENCHMARK(t_unitOperation,
                   { unitOperation_ptr->rhs(t, y + first_idx, dy_dt + first_idx, *solver, true, false, false, false); });
@@ -169,7 +169,7 @@ int Solver::rhs_stiff(realtype t, N_Vector y_sundials, N_Vector dy_dt_sundials, 
         realtype t_total = std::accumulate(t_unitOperations.begin(), t_unitOperations.end(), 0.0);
         oss << "t=" << t << "\t\tt_total=" << (t_total);
         for (size_t i = 0; i < t_unitOperations.size(); ++i) {
-            auto* uo_ptr = solver->process.unitOperations[i];
+            const auto& uo_ptr = solver->process.unitOperations[i];
             oss << "\t\tt_unitOperation[" << i << ",type=" << static_cast<int>(uo_ptr->getType())
                 << "]=" << (t_unitOperations[i]);
         }

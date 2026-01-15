@@ -14,14 +14,14 @@ std::pair<RowVector, realtype> oneCellReaction(const ReactionSystem& reactionSys
                                                realtype t_duration,
                                                SolverType solverType,
                                                realtype timeout_seconds) {
-    Volume volume{reactionSystem,
-                  1.0};  // Volume of 1 m³ (solution is concentration, y contains masses/amounts -> no conversion necessary)
-    volume.y = solution;
+    auto volume = std::make_shared<Volume>(reactionSystem,
+                  1.0);  // Volume of 1 m³ (solution is concentration, y contains masses/amounts -> no conversion necessary)
+    volume->y = solution;
 
-    Process process{reactionSystem.componentSystem, {&volume}, t_duration};
+    Process process{reactionSystem.componentSystem, {volume}, t_duration};
     Solver solver{process, solverType};
 
-    auto obs = std::make_shared<SnapshotObserver>(t_duration, volume.all(), true);
+    auto obs = std::make_shared<SnapshotObserver>(t_duration, volume->all(), true);
     solver.add(obs);
 
     solver.solve(t_duration, timeout_seconds);

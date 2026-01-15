@@ -71,7 +71,7 @@ class Solver {
     bool checkTimeout() const;
 
     const Process& process;
-    std::unordered_map<UnitOperationBase*, std::size_t> unitOperationStartIdx;
+    std::unordered_map<const UnitOperationBase*, std::size_t> unitOperationStartIdx;
 
     // Type of the solver
     SolverType solverType;
