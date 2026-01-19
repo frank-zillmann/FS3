@@ -21,14 +21,21 @@ class Process {
     friend class Solver;
 
    public:
+    // Constructor accepting a vector (preferred for Python bindings)
     Process(const ComponentSystem& componentSystem,
-            const std::initializer_list<std::shared_ptr<UnitOperationBase>> unitOperations,
+            const std::vector<std::shared_ptr<UnitOperationBase>>& unitOperations,
             realtype t_end = std::numeric_limits<realtype>::infinity())
         : componentSystem(componentSystem), unitOperations(unitOperations), t_end(t_end) {
         c_inlet_buffer.resize(1, componentSystem.n_components);
         dc_dt_inlet_buffer.resize(1, componentSystem.n_components);
         dc_dt_outlet_buffer.resize(1, componentSystem.n_components);
     }
+
+    // Constructor accepting an initializer_list (convenient for C++)
+    Process(const ComponentSystem& componentSystem,
+            const std::initializer_list<std::shared_ptr<UnitOperationBase>> unitOperations,
+            realtype t_end = std::numeric_limits<realtype>::infinity())
+        : Process(componentSystem, std::vector<std::shared_ptr<UnitOperationBase>>(unitOperations), t_end) {}
 
     void addConnection(const ArrayMapper from, const ArrayMapper to, std::function<realtype(realtype)> flowRateFunction) {
         connections.push_back({from, to, flowRateFunction});

@@ -3,21 +3,19 @@
 
 See a [**Simulation of a hIgG Purification Process using the Rotor Stator High Gradient Magnetic Separation**](https://github.com/frank-zillmann/HGMS-hIgG-separation) as an example application of this framework.
 
-## Setup and Build Instructions
+## Prerequisites
 
-### Prerequisites
-
-#### Required Dependencies
+### Required Dependencies
 - **C++ Compiler**: C++20 support
 - **CMake**: Version 3.16 or higher
 - **SUNDIALS**: with components: cvode, nvecserial, sunlinsolband
 - **ZLIB**: Required by cnpy for reading/writing compressed .npz files (NumPy archives)
 
-#### Optional Dependencies
+### Optional Dependencies
 - **Doxygen**: For generating documentation (with graphviz for diagrams)
 - **LaTeX**: For PDF documentation generation
 
-#### Platform-Specific Installation
+### Platform-Specific Installation
 
 **Ubuntu/Debian:**
 ```bash
@@ -44,36 +42,71 @@ vcpkg install sundials zlib
 
 ### Clone and Setup
 ```bash
-git clone --recursive https://github.com/frank-zillmann/FS3.git
+git clone https://github.com/frank-zillmann/FS3.git --recursive
 cd FS3
 ```
 
 **Note:** The `--recursive` flag ensures git submodules (Eigen and cnpy) are cloned.
 
-### Build with Scripts
+## Build with Scripts or VS Code Tasks
 
-All scripts are located in the `scripts/` directory and handle the complete build process:
+- Use the scripts under `scripts/` directory or the provided VS Code tasks (press **`Ctrl + Shift + B`**)
+- `scripts/build.sh` script handles CMake configuration, building, and installation 
+- Cmake options can be passed as arguments
+- `./scripts/recompile.sh` for quick recompilation after code changes (no CMake reconfiguration)
+- Example usages (for these settings VS Code tasks are available):
 
 ```bash
-# Build in Release mode (optimized, with logging and benchmarking) - default
+# Build in Release mode, no logging, no bechmarking - fastest and default
 ./scripts/build.sh
 
-# Build in Release mode (benchmarking only, no logging)
-./scripts/build.sh -DLOG_ENABLED=OFF
+# Build in Release mode with logging enabled
+./scripts/build.sh -DLOG_ENABLED=ON
 
-# Build in Release mode (no logging, no benchmarking - fastest)
-./scripts/build.sh -DLOG_ENABLED=OFF -DBENCHMARK_ENABLED=OFF
+# Build in Release mode with benchmarking enabled
+./scripts/build.sh -DBENCHMARK_ENABLED=ON
 
-# Build in Debug mode (with logging, no benchmarking - for debugging)
-./scripts/build.sh -DCMAKE_BUILD_TYPE=Debug -DBENCHMARK_ENABLED=OFF
+# Build in Debug mode (includes AdressSanitizer) with logging enabled
+./scripts/build.sh -DCMAKE_BUILD_TYPE=Debug -DLOG_ENABLED=ON
 
 # Custom install location
 ./scripts/build.sh -DCMAKE_INSTALL_PREFIX=/custom/install/path
 
 # Quick recompile after code changes (no CMake reconfiguration)
 ./scripts/recompile.sh
+```
 
-# Generate documentation
+## CMake Build Options
+
+All these options can be passed to the build script:
+```bash
+./scripts/build.sh -DOPTION=VALUE
+```
+
+**Build Configuration:**
+- `-DCMAKE_BUILD_TYPE=Release|Debug` - Build type (default: Release)
+- `-DCMAKE_INSTALL_PREFIX=/path` - Installation directory (default: ./install)
+- `-DCMAKE_PREFIX_PATH=/path/to/sundials` - Custom SUNDIALS location
+
+**Feature Toggles:**
+- `-DLOG_ENABLED=ON|OFF` - Enable logging functionality (default: OFF)
+- `-DBENCHMARK_ENABLED=ON|OFF` - Enable benchmarking functionality (default: OFF)
+- `-DBUILD_DOCS=ON|OFF` - Generate Doxygen documentation (default: ON if Doxygen found)
+
+**Logging Configuration:**
+- `-DLOG_FIRST_N_CALLS=1000` - Log first N function calls (default: 1000)
+- `-DLOG_EVERY_N_CALLS=1000` - Log every Nth call after initial logging (default: 1000)
+- `-DOUTPUT_DIR=/path/to/output` - Custom output directory for logs and observations
+
+When using FS3 in applications, the output directory (default: `./run_yyyy-mm-dd_hh-mm-ss`) contains:
+- `logs/` - General logging output
+- `obs/` - Observation/simulation data
+- `bench/` - Benchmarking output (if enabled)
+
+## Build Documentation
+
+```bash
+# Generate Doxygen documentation
 ./scripts/docs.sh generate
 
 # Open documentation in browser
@@ -86,45 +119,7 @@ All scripts are located in the `scripts/` directory and handle the complete buil
 ./scripts/docs.sh pdf
 ```
 
-### VS Code Tasks
-
-If you're using VS Code, press **`Ctrl + Shift + B`** (or **`Cmd + Shift + B`** on macOS) and select:
-
-- **CMake: Release Build (Logging + Benchmarking)** - Optimized with logging and benchmarking
-- **CMake: Release Build (Benchmarking only)** - Optimized with benchmarking, no logging
-- **CMake: Release Build (no Logging, no Benchmarking)** - Optimized, fastest execution
-- **CMake: Debug Build (Logging only)** - Debug build with AddressSanitizer, for debugging
-- **CMake: Recompile** - Quick rebuild without CMake reconfiguration
-
-### CMake Build Options
-
-All options can be passed to the build script:
-```bash
-./scripts/build.sh -DOPTION=VALUE
-```
-
-**Build Configuration:**
-- `-DCMAKE_BUILD_TYPE=Release|Debug` - Build type (default: Release)
-- `-DCMAKE_INSTALL_PREFIX=/path` - Installation directory (default: ./install)
-- `-DCMAKE_PREFIX_PATH=/path/to/sundials` - Custom SUNDIALS location
-
-**Feature Toggles:**
-- `-DLOG_ENABLED=ON|OFF` - Enable logging functionality (default: ON)
-- `-DBENCHMARK_ENABLED=ON|OFF` - Enable benchmarking functionality (default: ON)
-- `-DBUILD_DOCS=ON|OFF` - Generate Doxygen documentation (default: ON if Doxygen found)
-
-**Logging Configuration:**
-- `-DLOG_FIRST_N_CALLS=1000` - Log first N function calls (default: 1000)
-- `-DLOG_EVERY_N_CALLS=1000` - Log every Nth call after initial logging (default: 1000)
-- `-DOUTPUT_DIR=/path/to/output` - Custom output directory for logs and observations
-
-**Output Structure:**
-When using FS3 in applications, the output directory (default: `./run_yyyy-mm-dd_hh-mm-ss`) contains:
-- `logs/` - General logging output
-- `obs/` - Observation/simulation data
-- `bench/` - Benchmarking output (if enabled)
-
-### Using FS3 in Your Project
+## Using FS3 in C++
 
 After installation, add to your `CMakeLists.txt`:
 
@@ -137,8 +132,6 @@ find_package(FS3 REQUIRED)
 add_executable(my_simulation main.cpp)
 target_link_libraries(my_simulation PRIVATE FS3::FS3)
 ```
-
-### Logging and Benchmarking Macros
 
 **Logging Macros:**
 - `LOG(file, msg)` - Writes to `logs/<file>` in the output directory. Only active when `LOG_ENABLED=ON`.
@@ -154,7 +147,7 @@ target_link_libraries(my_simulation PRIVATE FS3::FS3)
 
 - `BENCHMARK(var, { code })` - Measures time in seconds for code block. The duration is stored in `var`. When `BENCHMARK_ENABLED=OFF`, code still executes but without timing overhead.
   ```cpp
-  double t;
+  double t;default_components=python 
   BENCHMARK(t, {
       // Code to benchmark
   });
@@ -162,4 +155,38 @@ target_link_libraries(my_simulation PRIVATE FS3::FS3)
   ```
 
 Note: For better debugging with Eigen, I recommend to install [gdb-eigen-printers](https://github.com/gilleswaeber/gdb-eigen-printers).
+
+## Using FS3 in Python
+
+**Prerequisites:**
+- Python 3.8+ with development headers
+- numpy (installed automatically as dependency)
+
+**Option 1: Build wheel (recommended for distribution)**
+```bash
+pip install scikit-build-core nanobind
+pip wheel . --no-deps -w install/dist/
+pip install install/dist/fs3-*.whl
+```
+
+**Option 2: Direct install to conda/virtualenv**
+```bash
+# Builds and installs Python module to site-packages
+./scripts/build.sh -DBUILD_PYTHON_BINDINGS=ON -DCMAKE_INSTALL_PREFIX=$CONDA_PREFIX # for conda
+./scripts/build.sh -DBUILD_PYTHON_BINDINGS=ON -DCMAKE_INSTALL_PREFIX=$VIRTUAL_ENV # for virtualenv
+```
+
+**Verify installation:**
+```python
+import fs3
+print(fs3.Component("H+", charge=1, molar_mass_kg_per_mol=0.001))
+```
+
+**Note:** When `BUILD_PYTHON_BINDINGS=ON`, the C++ targets are not installed by default to avoid pollution of site-packages with C++ files.
+Python users get only:
+```
+site-packages/fs3/
+  fs3.cpython-<version>-<platform>.so  # Compiled extension
+  fs3.pyi                               # Type hints for IDEs
+```
 

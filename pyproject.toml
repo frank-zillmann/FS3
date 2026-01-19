@@ -1,0 +1,26 @@
+[build-system]
+requires = ["scikit-build-core", "nanobind"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "fs3"
+version = "0.0.1"
+description = "Fast and Flexible Framework for Simple Simulations of Separation-Processes"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    {name = "Frank Zillmann"},
+]
+dependencies = [
+    "numpy>=1.20",
+]
+
+[project.urls]
+Homepage = "https://github.com/frank-zillmann/FS3"
+
+[tool.scikit-build]
+cmake.build-type = "Release"
+install.components = ["python"]
+
+[tool.scikit-build.cmake.define]
+BUILD_PYTHON_BINDINGS = "ON"

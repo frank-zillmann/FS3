@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "CMake: Release Build (Logging + Benchmarking)",
+            "label": "CMake: Release Build",
             "type": "shell",
             "command": "bash",
             "args": [
@@ -22,13 +22,13 @@
             }
         },
         {
-            "label": "CMake: Release Build (Benchmarking only)",
+            "label": "CMake: Release Build with benchmarking",
             "type": "shell",
             "command": "bash",
             "args": [
                 "${workspaceFolder}/scripts/build.sh",
                 "-DCMAKE_BUILD_TYPE=Release",
-                "-DLOG_ENABLED=OFF"
+                "-DBENCHMARK_ENABLED=ON"
             ],
             "group": "build",
             "problemMatcher": [
@@ -40,14 +40,13 @@
             }
         },
         {
-            "label": "CMake: Release Build (no Logging, no Benchmarking)",
+            "label": "CMake: Release Build with logging",
             "type": "shell",
             "command": "bash",
             "args": [
                 "${workspaceFolder}/scripts/build.sh",
                 "-DCMAKE_BUILD_TYPE=Release",
-                "-DLOG_ENABLED=OFF",
-                "-DBENCHMARK_ENABLED=OFF"
+                "-DLOG_ENABLED=ON",
             ],
             "group": "build",
             "problemMatcher": [
@@ -59,13 +58,13 @@
             }
         },
         {
-            "label": "CMake: Debug Build (Logging only)",
+            "label": "CMake: Debug Build with logging",
             "type": "shell",
             "command": "bash",
             "args": [
                 "${workspaceFolder}/scripts/build.sh",
                 "-DCMAKE_BUILD_TYPE=Debug",
-                "-DBENCHMARK_ENABLED=OFF"
+                "-DLOG_ENABLED=ON"
             ],
             "group": "build",
             "problemMatcher": [
