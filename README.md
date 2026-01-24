@@ -165,7 +165,7 @@ Note: For better debugging with Eigen, I recommend to install [gdb-eigen-printer
 **Option 1: Build wheel (recommended for distribution)**
 ```bash
 pip install scikit-build-core nanobind
-pip wheel . --no-deps -w install/dist/
+pip wheel . --no-deps --wheel-dir install/dist/
 pip install install/dist/fs3-*.whl
 ```
 
@@ -177,9 +177,8 @@ pip install install/dist/fs3-*.whl
 ```
 
 **Verify installation:**
-```python
-import fs3
-print(fs3.Component("H+", charge=1, molar_mass_kg_per_mol=0.001))
+```bash
+python python/examples/simple_pipe.py
 ```
 
 **Note:** When `BUILD_PYTHON_BINDINGS=ON`, the C++ targets are not installed by default to avoid pollution of site-packages with C++ files.
