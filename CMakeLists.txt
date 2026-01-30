@@ -1,4 +1,3 @@
-
 cmake_minimum_required(VERSION 3.16)
 
 set(PROJECT_NAME "FS3")
@@ -11,7 +10,7 @@ set(
 
 project(${PROJECT_NAME}
     VERSION ${PROJECT_VERSION}
-    DESCRIPTION "${PROJECT_DESCRIPTION}"
+    DESCRIPTION ${PROJECT_DESCRIPTION}
     HOMEPAGE_URL ${PROJECT_URL}
     LANGUAGES CXX
 )
@@ -19,77 +18,88 @@ project(${PROJECT_NAME}
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Build type
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
-
-message("Building with CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Building with CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 
 # Option to set LOG_ENABLED preprocessor flag
 option(LOG_ENABLED "Enable logging functionality" OFF)
-message("LOG_ENABLED: ${LOG_ENABLED}")
+message(STATUS "LOG_ENABLED: ${LOG_ENABLED}")
 
 # Option to set BENCHMARK_ENABLED preprocessor flag (independent of logging)
 option(BENCHMARK_ENABLED "Enable benchmarking functionality" OFF)
-message("BENCHMARK_ENABLED: ${BENCHMARK_ENABLED}")
+message(STATUS "BENCHMARK_ENABLED: ${BENCHMARK_ENABLED}")
 
 set(LOG_FIRST_N_CALLS "1000" CACHE STRING "Log first N calls")
-message("LOG_FIRST_N_CALLS: ${LOG_FIRST_N_CALLS}")
+message(STATUS "LOG_FIRST_N_CALLS: ${LOG_FIRST_N_CALLS}")
 
 set(LOG_EVERY_N_CALLS "1000" CACHE STRING "Log every Nth call")
-message("LOG_EVERY_N_CALLS: ${LOG_EVERY_N_CALLS}")
+message(STATUS "LOG_EVERY_N_CALLS: ${LOG_EVERY_N_CALLS}")
 
 # Option to set OUTPUT_DIR preprocessor flag
 set(OUTPUT_DIR "" CACHE STRING "Set output directory for logs")
 if(OUTPUT_DIR)
-    message("OUTPUT_DIR: ${OUTPUT_DIR}")
+    message(STATUS "OUTPUT_DIR: ${OUTPUT_DIR}")
 endif()
 
 # Add -march=native to Release only (keep portability in check!)
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-  set(CMAKE_CXX_FLAGS_RELEASE
-      "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
-  message("CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
+# Note: Disable for portable wheels with -DUSE_NATIVE_ARCH=OFF
+option(USE_NATIVE_ARCH "Use -march=native for Release builds" ON)
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND USE_NATIVE_ARCH)
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
+  message(STATUS "CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
 endif()
 
-# SUNDIALS
+# ==================== Dependencies ====================
+include(FetchContent)
+
+# SUNDIALS - System dependency (too complex to build inline)
 find_package(SUNDIALS REQUIRED COMPONENTS cvode nvecserial sunlinsolband)
-if (NOT SUNDIALS_FOUND)
-    message(FATAL_ERROR "SUNDIALS not found. Please install it or set the SUNDIALS_DIR environment variable.")
-else()
-    message(STATUS "SUNDIALS found: ${SUNDIALS_LIBRARIES}")
-endif()
+message(STATUS "SUNDIALS found: ${SUNDIALS_VERSION}")
 
-# ZLIB (required by cnpy)
+# ZLIB - System dependency (required by cnpy)
 find_package(ZLIB REQUIRED)
-if (NOT ZLIB_FOUND)
-    message(FATAL_ERROR "ZLIB not found. Please install it.")
-endif()
+message(STATUS "ZLIB found: ${ZLIB_VERSION_STRING}")
 
-# EIGEN - EXCLUDE_FROM_ALL prevents installing Eigen's headers
-add_subdirectory(external/eigen EXCLUDE_FROM_ALL)
+# EIGEN - Header-only library, always fetched via FetchContent
+message(STATUS "Fetching Eigen via FetchContent...")
+FetchContent_Declare(
+    eigen
+    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+    GIT_TAG 5.0.1
+    GIT_SHALLOW TRUE
+)
+# Just populate, don't add_subdirectory (avoids export/install issues)
+FetchContent_Populate(eigen)
+set(EIGEN_INCLUDE_DIR "${eigen_SOURCE_DIR}")
+message(STATUS "Eigen fetched to: ${EIGEN_INCLUDE_DIR}")
 
-# CNPY - EXCLUDE_FROM_ALL prevents installing cnpy's binaries/headers
-add_subdirectory(external/cnpy EXCLUDE_FROM_ALL)
+# CNPY - Small library for NumPy file I/O (compiled directly into FS3)
+message(STATUS "Fetching cnpy via FetchContent...")
+FetchContent_Declare(
+    cnpy
+    GIT_REPOSITORY https://github.com/rogersce/cnpy.git
+    GIT_TAG master
+    GIT_SHALLOW TRUE
+)
+# Just populate, don't add_subdirectory, compile cnpy.cpp directly into FS3
+FetchContent_Populate(cnpy)
 
-# Enable PIC for cnpy-static (needed when linking into Python module)
-set_target_properties(cnpy-static PROPERTIES POSITION_INDEPENDENT_CODE ON)
-
-# Build FS3
+# ==================== Build FS3 Library ====================
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
-# Exclude example, experiment and test files
-list(FILTER SRC_FILES EXCLUDE REGEX ".*/(Examples|Experiments|Tests)/.*")
+# Exclude example, experiment and test files (currently not needed)
+# list(FILTER SRC_FILES EXCLUDE REGEX ".*/(Examples|Experiments|Tests)/.*")
+
+# Add cnpy source directly to FS3 (avoids export issues)
+list(APPEND SRC_FILES "${cnpy_SOURCE_DIR}/cnpy.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
-
-# Enable PIC for this library (needed when linking into Python module)
-set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Sanitizer flags: apply after target creation, use PUBLIC for propagation to applications
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -102,14 +112,22 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     )
     target_compile_options(${PROJECT_NAME} PUBLIC $<$<CONFIG:Debug>:${ASAN_FLAGS}>)
     target_link_options(${PROJECT_NAME} PUBLIC $<$<CONFIG:Debug>:${ASAN_FLAGS}>)
-    message("[FS3] Exporting sanitizer flags for Debug builds (PUBLIC): ${ASAN_FLAGS}")
+    message(STATUS "Exporting sanitizer flags for Debug builds (PUBLIC): ${ASAN_FLAGS}")
 endif()
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/cnpy>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    PRIVATE
+        # cnpy headers only needed internally
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/external/cnpy>
+        $<BUILD_INTERFACE:${cnpy_SOURCE_DIR}>
+)
+
+# Add Eigen include path (header-only, fetched via FetchContent)
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
+    $<BUILD_INTERFACE:${EIGEN_INCLUDE_DIR}>
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -119,8 +137,8 @@ target_link_libraries(${PROJECT_NAME}
         SUNDIALS::cvode
         SUNDIALS::nvecserial
         SUNDIALS::sunlinsolband
-        Eigen3::Eigen
-        cnpy-static
+    PRIVATE
+        # ZLIB is required by cnpy (compiled directly into FS3)
         ZLIB::ZLIB
 )
 
@@ -141,19 +159,17 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC LOG_FIRST_N_CALLS=${LOG_FIRST_
 target_compile_definitions(${PROJECT_NAME} PUBLIC LOG_EVERY_N_CALLS=${LOG_EVERY_N_CALLS})
 
 if(OUTPUT_DIR)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC OUTPUT_DIR="${OUTPUT_DIR}")
+    target_compile_definitions(${PROJECT_NAME} PUBLIC OUTPUT_DIR=${OUTPUT_DIR})
 endif()
 
 # ==================== Doxygen Documentation (Optional) ====================
-option(BUILD_DOCS "Build documentation" ON)
+option(BUILD_DOCS "Build documentation" OFF)
 if(BUILD_DOCS)
-    find_package(Doxygen REQUIRED)
+    find_package(Doxygen)
     if(DOXYGEN_FOUND)        
-        # Configure Doxyfile
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in 
                        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
         
-        # Add custom target for documentation
         add_custom_target(docs
             COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -161,7 +177,6 @@ if(BUILD_DOCS)
             VERBATIM
         )
         
-        # Add custom target for opening documentation
         add_custom_target(docs-open
             COMMAND xdg-open ${CMAKE_CURRENT_BINARY_DIR}/docs/html/index.html
             DEPENDS docs
@@ -178,27 +193,24 @@ endif()
 option(BUILD_PYTHON_BINDINGS "Build Python bindings using nanobind" OFF)
 if(BUILD_PYTHON_BINDINGS)
     message(STATUS "Python bindings enabled")
+
+    # Enable PIC (needed when linking into Python module)
+    set_target_properties(${PROJECT_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON)
     
-    # Find Python
     find_package(Python 3.8 COMPONENTS Interpreter Development.Module REQUIRED)
     
     # Fetch nanobind
-    include(FetchContent)
     FetchContent_Declare(
         nanobind
         GIT_REPOSITORY https://github.com/wjakob/nanobind.git
         GIT_TAG v2.10.2
-        GIT_SHALLOW TRUE  # Only fetch the specific tag, not full history (faster!)
-        DOWNLOAD_EXTRACT_TIMESTAMP TRUE  # Avoid CMake warnings
+        GIT_SHALLOW TRUE
     )
     message(STATUS "Fetching nanobind (this may take a moment on first build)...")
     FetchContent_MakeAvailable(nanobind)
 
     # Create the Python module
-    nanobind_add_module(fs3
-        python/bindings.cpp
-    )
-    
+    nanobind_add_module(fs3 python/bindings.cpp)
     target_link_libraries(fs3 PRIVATE ${PROJECT_NAME})
     
     # Install the Python module
@@ -221,16 +233,13 @@ if(BUILD_PYTHON_BINDINGS)
     
     message(STATUS "Python module 'fs3' will be built")
 
-# =================== Installation ====================
+# ==================== C++ Installation ====================
 else()
-
     include(GNUInstallDirs)
 
-    # Install all targets to satisfy CMake export requirements (for C++ consumers)
-    # cnpy-static is included in export because FS3 links to it, but since it's PRIVATE
-    # and statically linked, consumers don't directly use it
+    # Install FS3 library only (cnpy is statically linked and not exported)
     install(
-        TARGETS ${PROJECT_NAME} eigen cnpy-static
+        TARGETS ${PROJECT_NAME}
         EXPORT ${PROJECT_NAME}Targets
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Development
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Runtime
@@ -238,21 +247,14 @@ else()
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
 
-    # Install public headers (C++ development only)
+    # Install public headers
     install(
         DIRECTORY ${PROJECT_SOURCE_DIR}/include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         COMPONENT Development
     )
 
-    # Install cnpy headers (C++ development only)
-    install(
-        FILES ${CMAKE_CURRENT_SOURCE_DIR}/external/cnpy/cnpy.h
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        COMPONENT Development
-    )
-
-    # Export target set for find_package (C++ development only)
+    # Export target set for find_package
     install(
         EXPORT ${PROJECT_NAME}Targets
         FILE ${PROJECT_NAME}Targets.cmake
