@@ -42,11 +42,11 @@ vcpkg install sundials zlib
 
 ### Clone and Setup
 ```bash
-git clone https://github.com/frank-zillmann/FS3.git --recursive
+git clone https://github.com/frank-zillmann/FS3.git
 cd FS3
 ```
 
-**Note:** The `--recursive` flag ensures git submodules (Eigen and cnpy) are cloned.
+**Note:** Eigen and cnpy are fetched automatically via CMake FetchContent and are not required as submodules.
 
 ## Build with Scripts or VS Code Tasks
 
@@ -91,7 +91,8 @@ All these options can be passed to the build script:
 **Feature Toggles:**
 - `-DLOG_ENABLED=ON|OFF` - Enable logging functionality (default: OFF)
 - `-DBENCHMARK_ENABLED=ON|OFF` - Enable benchmarking functionality (default: OFF)
-- `-DBUILD_DOCS=ON|OFF` - Generate Doxygen documentation (default: ON if Doxygen found)
+- `-DBUILD_DOCS=ON|OFF` - Generate Doxygen documentation (default: OFF)
+- `-DUSE_NATIVE_ARCH=ON|OFF` - Use `-march=native` for Release builds (default: ON, disable for portable wheels)
 
 **Logging Configuration:**
 - `-DLOG_FIRST_N_CALLS=1000` - Log first N function calls (default: 1000)
@@ -147,7 +148,7 @@ target_link_libraries(my_simulation PRIVATE FS3::FS3)
 
 - `BENCHMARK(var, { code })` - Measures time in seconds for code block. The duration is stored in `var`. When `BENCHMARK_ENABLED=OFF`, code still executes but without timing overhead.
   ```cpp
-  double t;default_components=python 
+  double t;
   BENCHMARK(t, {
       // Code to benchmark
   });
@@ -184,8 +185,7 @@ python python/examples/simple_pipe.py
 **Note:** When `BUILD_PYTHON_BINDINGS=ON`, the C++ targets are not installed by default to avoid pollution of site-packages with C++ files.
 Python users get only:
 ```
-site-packages/fs3/
+site-packages/
   fs3.cpython-<version>-<platform>.so  # Compiled extension
   fs3.pyi                               # Type hints for IDEs
 ```
-
