@@ -19,8 +19,15 @@ def main():
 
     components = [
         fs3.Component("H2O"),
-        fs3.Component("H+").set_charge(1).set_molar_mass(0.001),
-        fs3.Component("OH-").set_charge(-1).set_molar_mass(0.017),
+        fs3.Component(
+            "H+", charge=1, truesdell_jones_alpha=4.78e-10, truesdell_jones_beta=0.24e-3
+        ),
+        fs3.Component(
+            "OH-",
+            charge=-1,
+            truesdell_jones_alpha=10.65e-10,
+            truesdell_jones_beta=0.21e-3,
+        ),
         fs3.Component("Tracer"),
     ]
 

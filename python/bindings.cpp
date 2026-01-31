@@ -42,7 +42,7 @@ namespace nb = nanobind;
 using namespace nb::literals;
 
 NB_MODULE(fs3, m) {
-    m.doc() = "FS3 - Fast and Flexible Framework for Simple Simulations of Separation-Processes";
+    m.doc() = "FS³ - Fast and Flexible Framework for Simple Simulations of Separation-Processes";
 
     // ==================== Enums ====================
 
@@ -94,14 +94,6 @@ NB_MODULE(fs3, m) {
             if (kwargs.contains("truesdell_jones_beta"))  { beta  = nb::cast<double>(kwargs["truesdell_jones_beta"]);  has_alpha = true; }
             if (has_alpha) self.setTruesdellJonesParameters(alpha, beta);
         }, "name"_a, "kwargs"_a)
-        .def("set_charge", &Component::setCharge, "charge"_a, nb::rv_policy::reference)
-        .def("set_type", &Component::setType, "type"_a, nb::rv_policy::reference)
-        .def("set_molar_mass", &Component::setMolarMass, "molar_mass_kg_per_mol"_a, nb::rv_policy::reference)
-        .def("set_truesdell_jones_parameters", &Component::setTruesdellJonesParameters,
-             "alpha_meter"_a = 0.0, "beta_cubicmeter_per_mol"_a = 0.0, nb::rv_policy::reference)
-        .def("set_radius", &Component::setRadius, "radius_m"_a, nb::rv_policy::reference)
-        .def("set_density", &Component::setDensity, "density_kg_per_m3"_a, nb::rv_policy::reference)
-        .def("set_magnetic_saturation", &Component::setMagneticSaturation, "magnetic_saturation_A_per_m"_a, nb::rv_policy::reference)
         .def_rw("name", &Component::name)
         .def_rw("charge", &Component::charge)
         .def_rw("type", &Component::type)
