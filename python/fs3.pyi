@@ -297,7 +297,6 @@ class Process:
         self,
         component_system: ComponentSystem,
         unit_operations: List[UnitOperationBase],
-        t_end: float = float("inf"),
     ) -> None: ...
     def add_connection(
         self,

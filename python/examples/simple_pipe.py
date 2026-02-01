@@ -84,11 +84,7 @@ def main():
 
     # ==================== Process ====================
 
-    t_end = 30.0  # Simulate for 30 seconds
-
-    process = fs3.Process(
-        component_system, [inlet, pipe, outlet], t_end=t_end  # Simulate for 30 seconds
-    )
+    process = fs3.Process(component_system, [inlet, pipe, outlet])
 
     # Connect: inlet -> pipe -> outlet
     process.add_connection(inlet.out(), pipe.in_(), flow_rate)
@@ -101,6 +97,8 @@ def main():
     solver = fs3.Solver(process, fs3.SolverType.BDF)
 
     print(f"Created {solver}")
+
+    t_end = 30.0  # Simulate for 30 seconds
 
     # Add observers to capture results at pipe outlet
     observer = fs3.TimeSeriesObserver(

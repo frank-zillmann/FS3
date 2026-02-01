@@ -292,11 +292,9 @@ NB_MODULE(fs3, m) {
 
     nb::class_<Process>(m, "Process")
         .def(nb::init<const ComponentSystem&,
-                      const std::vector<std::shared_ptr<UnitOperationBase>>&,
-                      realtype>(),
+                      const std::vector<std::shared_ptr<UnitOperationBase>>&>(),
              "component_system"_a, "unit_operations"_a,
-             "t_end"_a = std::numeric_limits<realtype>::infinity(),
-             nb::keep_alive<1, 2>(), nb::keep_alive<1, 3>())
+             nb::keep_alive<1, 2>())
         .def("add_connection", &Process::addConnection,
              "from_mapper"_a, "to_mapper"_a, "flow_rate_function"_a)
         .def("get_unit_operations", &Process::getUnitOperations, nb::rv_policy::reference)

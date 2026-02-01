@@ -125,12 +125,6 @@ Solver::Solver(const Process& process, SolverType solverType)
             CHECK_SUNDIALS_FLAG(flag, "CVodeSetConstraints");
         }
 
-        if (process.t_end < std::numeric_limits<realtype>::infinity()) {
-            // Set the stop time for the integration
-            flag = CVodeSetStopTime(solver_memory, process.t_end);
-            CHECK_SUNDIALS_FLAG(flag, "CVodeSetStopTime");
-        }
-
         if (solverType == SolverType::BDF) {
             // BDF: uses Newton iteration and therefore requires a linear solver; allow optional Jacobian
             if (use_analytic_jacobian) {
@@ -219,12 +213,6 @@ Solver::Solver(const Process& process, SolverType solverType)
         // flag = ERKStepSetMinStep(solver_memory, min_step);
         // CHECK_SUNDIALS_FLAG(flag, "ERKStepSetMinStep");
 
-        if (process.t_end < std::numeric_limits<realtype>::infinity()) {
-            // Set the stop time for the integration
-            flag = ERKStepSetStopTime(solver_memory, process.t_end);
-            CHECK_SUNDIALS_FLAG(flag, "ERKStepSetStopTime");
-        }
-
         // Robustness settings for explicit solver
         flag = ERKStepSetMinStep(solver_memory, min_step);
         CHECK_SUNDIALS_FLAG(flag, "ERKStepSetMinStep");
@@ -250,12 +238,6 @@ Solver::Solver(const Process& process, SolverType solverType)
 
         flag = ARKStepSetMaxNumSteps(solver_memory, max_steps);
         CHECK_SUNDIALS_FLAG(flag, "ARKStepSetMaxNumSteps");
-
-        if (process.t_end < std::numeric_limits<realtype>::infinity()) {
-            // Set the stop time for the integration
-            flag = ARKStepSetStopTime(solver_memory, process.t_end);
-            CHECK_SUNDIALS_FLAG(flag, "ARKStepSetStopTime");
-        }
 
         // ARKode with implicit/stiff part always needs a linear solver
         auto half_band_width = process.componentSystem.n_components;

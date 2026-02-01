@@ -18,7 +18,7 @@ std::pair<RowVector, realtype> oneCellReaction(const ReactionSystem& reactionSys
                   1.0);  // Volume of 1 m³ (solution is concentration, y contains masses/amounts -> no conversion necessary)
     volume->y = solution;
 
-    Process process{reactionSystem.componentSystem, {volume}, t_duration};
+    Process process{reactionSystem.componentSystem, {volume}};
     Solver solver{process, solverType};
 
     auto obs = std::make_shared<SnapshotObserver>(t_duration, volume->all(), true);

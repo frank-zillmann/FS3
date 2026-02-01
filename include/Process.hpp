@@ -23,9 +23,8 @@ class Process {
    public:
     // Constructor accepting a vector (preferred for Python bindings)
     Process(const ComponentSystem& componentSystem,
-            const std::vector<std::shared_ptr<UnitOperationBase>>& unitOperations,
-            realtype t_end = std::numeric_limits<realtype>::infinity())
-        : componentSystem(componentSystem), unitOperations(unitOperations), t_end(t_end) {
+            const std::vector<std::shared_ptr<UnitOperationBase>>& unitOperations)
+        : componentSystem(componentSystem), unitOperations(unitOperations) {
         c_inlet_buffer.resize(1, componentSystem.n_components);
         dc_dt_inlet_buffer.resize(1, componentSystem.n_components);
         dc_dt_outlet_buffer.resize(1, componentSystem.n_components);
@@ -33,9 +32,8 @@ class Process {
 
     // Constructor accepting an initializer_list (convenient for C++)
     Process(const ComponentSystem& componentSystem,
-            const std::initializer_list<std::shared_ptr<UnitOperationBase>> unitOperations,
-            realtype t_end = std::numeric_limits<realtype>::infinity())
-        : Process(componentSystem, std::vector<std::shared_ptr<UnitOperationBase>>(unitOperations), t_end) {}
+            const std::initializer_list<std::shared_ptr<UnitOperationBase>> unitOperations)
+        : Process(componentSystem, std::vector<std::shared_ptr<UnitOperationBase>>(unitOperations)) {}
 
     void addConnection(const ArrayMapper from, const ArrayMapper to, std::function<realtype(realtype)> flowRateFunction) {
         connections.push_back({from, to, flowRateFunction});
@@ -52,8 +50,6 @@ class Process {
 
     // List of all unit operations in the process
     const std::vector<std::shared_ptr<UnitOperationBase>> unitOperations;
-
-    realtype t_end;  // End time of the process (default: infinity)
 
     struct Connection {
         ArrayMapper fromMapper;  // helper to get the data from the from unit operation
