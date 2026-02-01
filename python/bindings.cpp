@@ -88,11 +88,12 @@ NB_MODULE(fs3, m) {
                 self.setDensity(nb::cast<double>(kwargs["density_kg_per_m3"]));
             if (kwargs.contains("magnetic_saturation_A_per_m"))
                 self.setMagneticSaturation(nb::cast<double>(kwargs["magnetic_saturation_A_per_m"]));
-            bool has_alpha = false;
-            double alpha = 0.0, beta = 0.0;
-            if (kwargs.contains("truesdell_jones_alpha")) { alpha = nb::cast<double>(kwargs["truesdell_jones_alpha"]); has_alpha = true; }
-            if (kwargs.contains("truesdell_jones_beta"))  { beta  = nb::cast<double>(kwargs["truesdell_jones_beta"]);  has_alpha = true; }
-            if (has_alpha) self.setTruesdellJonesParameters(alpha, beta);
+            if (kwargs.contains("truesdell_jones_alpha_meter") && kwargs.contains("truesdell_jones_beta_cubicmeter_per_mol"))
+                self.setTruesdellJonesParameters(nb::cast<double>(kwargs["truesdell_jones_alpha_meter"]),
+                                                 nb::cast<double>(kwargs["truesdell_jones_beta_cubicmeter_per_mol"]));
+            else if (kwargs.contains("truesdell_jones_alpha_meter") || kwargs.contains("truesdell_jones_beta_cubicmeter_per_mol"))
+                throw std::invalid_argument(
+                    "Both truesdell_jones_alpha_meter and truesdell_jones_beta_cubicmeter_per_mol must be provided together!");
         }, "name"_a, "kwargs"_a)
         .def_rw("name", &Component::name)
         .def_rw("charge", &Component::charge)

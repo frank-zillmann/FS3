@@ -15,7 +15,6 @@ import fs3
 
 def main():
     # ==================== Components ====================
-    print("Creating components...")
 
     components = [
         fs3.Component("H2O"),
@@ -35,7 +34,6 @@ def main():
     print(f"Created {component_system}")
 
     # ==================== Activity Model & Reactions ====================
-    print("Setting up reactions...")
 
     activity_model = fs3.NoActivityModel(component_system)
     reaction_system = fs3.ReactionSystem(component_system, activity_model)
@@ -53,7 +51,6 @@ def main():
     print(f"Created {reaction_system}")
 
     # ==================== Unit Operations ====================
-    print("Creating unit operations...")
 
     # Inlet: provides boundary conditions
     def inlet_concentration(t: float) -> np.ndarray:
@@ -81,15 +78,16 @@ def main():
     # Outlet: collects outflow
     outlet = fs3.Outlet(reaction_system)
 
-    print(f"  Inlet: {inlet}")
-    print(f"  Pipe: {pipe}")
-    print(f"  Outlet: {outlet}")
+    print(f"Created {inlet}")
+    print(f"Created {pipe}")
+    print(f"Created {outlet}")
 
     # ==================== Process ====================
-    print("Creating process...")
+
+    t_end = 30.0  # Simulate for 30 seconds
 
     process = fs3.Process(
-        component_system, [inlet, pipe, outlet], t_end=30.0  # Simulate for 30 seconds
+        component_system, [inlet, pipe, outlet], t_end=t_end  # Simulate for 30 seconds
     )
 
     # Connect: inlet -> pipe -> outlet
@@ -99,24 +97,27 @@ def main():
     print(f"Created {process}")
 
     # ==================== Solver ====================
-    print("Creating solver...")
 
     solver = fs3.Solver(process, fs3.SolverType.BDF)
+
+    print(f"Created {solver}")
 
     # Add observers to capture results at pipe outlet
     observer = fs3.TimeSeriesObserver(
         t_start=0.0,
-        t_end=30.0,
+        t_end=t_end,
         n_snapshots=100,
         mapper=pipe.out(),
         compute_errors=False,
     )
     observer.add_all_snapshots_to_solver(solver)
 
+    print(f"Added observer: {observer}")
+
     # ==================== Simulation ====================
     print("Running simulation...")
 
-    solver.solve(t_stop=30.0, timeout_seconds=60.0)
+    solver.solve(t_stop=t_end, timeout_seconds=60.0)
 
     print(f"Simulation completed!")
     print(f"  Final time: {solver.get_t():.3f} s")
@@ -132,7 +133,17 @@ def main():
     observer.save_to_npy("pipe_simulation_results.npy")
     print("  Results saved to pipe_simulation_results.npy")
 
-    solver.log_statistics()
+    import matplotlib.pyplot as plt
+
+    # Plot tracer concentration at pipe outlet over time
+    time_points = np.linspace(0, t_end, results.shape[0])
+    tracer_conc_outlet = results[:, -1, 3]  # Last cell, Tracer component
+    plt.plot(time_points, tracer_conc_outlet)
+    plt.xlabel("Time (s)")
+    plt.ylabel("Tracer Concentration (mol/m³)")
+    plt.title("Tracer Concentration at Pipe Outlet Over Time")
+    plt.grid()
+    plt.show()
 
 
 if __name__ == "__main__":
