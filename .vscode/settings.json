@@ -21,7 +21,7 @@
     },
     "[cpp]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "ms-vscode.cpptools"
+        "editor.defaultFormatter": "xaver.clang-format"
     },
     "[cmake]": {
         "editor.formatOnSave": true

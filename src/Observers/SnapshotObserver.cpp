@@ -1,7 +1,8 @@
+#include "Observers/SnapshotObserver.hpp"
+
 #include <cstddef>
 #include <iostream>
 
-#include "Observers/SnapshotObserver.hpp"
 #include "Solver.hpp"
 #include "UnitOperations/UnitOperationBase.hpp"
 #include "cnpy.h"

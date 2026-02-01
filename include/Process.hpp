@@ -22,8 +22,7 @@ class Process {
 
    public:
     // Constructor accepting a vector (preferred for Python bindings)
-    Process(const ComponentSystem& componentSystem,
-            const std::vector<std::shared_ptr<UnitOperationBase>>& unitOperations)
+    Process(const ComponentSystem& componentSystem, const std::vector<std::shared_ptr<UnitOperationBase>>& unitOperations)
         : componentSystem(componentSystem), unitOperations(unitOperations) {
         c_inlet_buffer.resize(1, componentSystem.n_components);
         dc_dt_inlet_buffer.resize(1, componentSystem.n_components);

@@ -21,7 +21,8 @@ enum class Type { NonMageneticComponent, MagneticNanoParticle, MagneticNanoParti
  * particle radius/density, magnetic saturation, activity parameters).
  * Provides a fluent builder-style API for concise setup.
  */
-struct Component {
+class Component {
+   public:
     std::string name;
     int charge = 0;                           // Charge of the component, e.g., +1 for H+, -1 for OH-
     Type type = Type::NonMageneticComponent;  // Type of the component, default is non-magnetic

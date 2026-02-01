@@ -15,7 +15,7 @@ std::pair<RowVector, realtype> oneCellReaction(const ReactionSystem& reactionSys
                                                SolverType solverType,
                                                realtype timeout_seconds) {
     auto volume = std::make_shared<Volume>(reactionSystem,
-                  1.0);  // Volume of 1 m³ (solution is concentration, y contains masses/amounts -> no conversion necessary)
+                                           1.0);  // Volume of 1 m³ (solution is concentration, y contains masses/amounts -> no conversion necessary)
     volume->y = solution;
 
     Process process{reactionSystem.componentSystem, {volume}};
