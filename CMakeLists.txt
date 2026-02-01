@@ -126,6 +126,8 @@ target_include_directories(${PROJECT_NAME}
 )
 
 # Add Eigen include path (header-only, fetched via FetchContent)
+# BUILD_INTERFACE: Use fetched Eigen during build
+# For installed consumers, they get Eigen via find_dependency(Eigen3) and we link to Eigen3::Eigen
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
     $<BUILD_INTERFACE:${EIGEN_INCLUDE_DIR}>
 )
@@ -137,6 +139,8 @@ target_link_libraries(${PROJECT_NAME}
         SUNDIALS::cvode
         SUNDIALS::nvecserial
         SUNDIALS::sunlinsolband
+        # For installed consumers, propagate Eigen includes via Eigen3::Eigen
+        $<INSTALL_INTERFACE:Eigen3::Eigen>
     PRIVATE
         # ZLIB is required by cnpy (compiled directly into FS3)
         ZLIB::ZLIB
