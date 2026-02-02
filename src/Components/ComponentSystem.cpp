@@ -40,7 +40,6 @@ void ComponentSystem::initializeHelperVectors() {
     // Fill with molar masses, using NaN if not defined
     for (sunindextype i = 0; i < n_components; ++i) {
         molar_masses(i) = components[i].molarMass;
-        inv_molar_masses(i) = 1.0 / components[i].molarMass;
         charges(i) = components[i].charge;
     }
 }

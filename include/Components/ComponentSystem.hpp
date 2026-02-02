@@ -14,31 +14,30 @@
  * inverse molar masses, charges). Provides mass⟷molar concentration conversion
  * utilities and name/idx lookup.
  */
-struct ComponentSystem {
+class ComponentSystem {
+   public:
     const std::vector<Component> components;
     const sunindextype n_components;
 
-    // Medium the components are in:
-    const std::string medium_name = "H₂O";         // Default medium name, can be changed if needed
-    const realtype temperature = 298.15;           // Default temperature in Kelvin
-    const realtype density = 1000.0;               // Default density of water in kg/m^3
-    const realtype dynamic_viscosity = 0.001;      // Default viscosity of water in Pa*s
-    const realtype relative_permittivity = 78.54;  // Default relative permittivity of water
+    // Medium/Conditions the components are in:
+    const realtype temperature;                    // [K]
+    const realtype density;                        // [kg/m^3]
+    const realtype dynamic_viscosity;              // [Pa*s]
+    const realtype relative_permittivity = 78.54;  // [1] (dimensionless)
 
-   private:
-    // Cached vectors for performance
-    RowVector molar_masses;
-    RowVector inv_molar_masses;
-    RowVector charges;
-    void initializeHelperVectors();
-
-   public:
-    ComponentSystem(const std::vector<Component>& components)
+    ComponentSystem(const std::vector<Component>& components,
+                    realtype temperature = 298.15,
+                    realtype density = 1000.0,
+                    realtype dynamic_viscosity = 0.001,
+                    realtype relative_permittivity = 78.54)
         : components(components),
           n_components(components.size()),
           molar_masses(components.size()),
-          inv_molar_masses(components.size()),
-          charges(components.size()) {
+          charges(components.size()),
+          temperature(temperature),
+          density(density),
+          dynamic_viscosity(dynamic_viscosity),
+          relative_permittivity(relative_permittivity) {
         initializeHelperVectors();
     }
 
@@ -65,8 +64,13 @@ struct ComponentSystem {
     auto molarConcentrationToMassConcentration(const InputArrayType& molar_concentrations) const -> Array;
 
     const RowVector& getMolarMasses() const { return molar_masses; }
-    const RowVector& getInvMolarMasses() const { return inv_molar_masses; }
     const RowVector& getCharges() const { return charges; }
+
+   private:
+    // Cached vectors for performance
+    RowVector molar_masses;
+    RowVector charges;
+    void initializeHelperVectors();
 };
 
 // Include template implementations

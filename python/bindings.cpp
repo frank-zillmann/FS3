@@ -111,17 +111,17 @@ NB_MODULE(fs3, m) {
     // ==================== ComponentSystem ====================
 
     nb::class_<ComponentSystem>(m, "ComponentSystem")
-        .def(nb::init<const std::vector<Component>&>(), "components"_a)
+        .def(nb::init<const std::vector<Component>&, realtype, realtype, realtype, realtype>(), "components"_a,
+             "temperature"_a = 298.15, "density"_a = 1000.0, "dynamic_viscosity"_a = 0.001,
+             "relative_permittivity"_a = 78.54)
         .def_ro("n_components", &ComponentSystem::n_components)
         .def_ro("components", &ComponentSystem::components)
-        .def_ro("medium_name", &ComponentSystem::medium_name)
         .def_ro("temperature", &ComponentSystem::temperature)
         .def_ro("density", &ComponentSystem::density)
         .def_ro("dynamic_viscosity", &ComponentSystem::dynamic_viscosity)
         .def_ro("relative_permittivity", &ComponentSystem::relative_permittivity)
         .def("get_idx", &ComponentSystem::getIdx, "name"_a)
         .def("get_molar_masses", &ComponentSystem::getMolarMasses)
-        .def("get_inv_molar_masses", &ComponentSystem::getInvMolarMasses)
         .def("get_charges", &ComponentSystem::getCharges)
         .def("__getitem__", nb::overload_cast<const std::string&>(&ComponentSystem::operator(), nb::const_), "name"_a)
         .def("__getitem__", nb::overload_cast<sunindextype>(&ComponentSystem::operator(), nb::const_), "index"_a)
