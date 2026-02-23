@@ -74,9 +74,9 @@ class RS_MagneticCaptureProcessChamber : public UnitOperationBase {
 
     const ColVector& get_V_l(realtype t, const realtype* y) const override;
 
-    const ArrayMapper in() const { return ArrayMapper(this, 1, n_components(), 0, 2); }
+    const ArrayMapper entry() const { return ArrayMapper(this, 1, n_components(), 0, 2); }
 
-    const ArrayMapper out() const {
+    const ArrayMapper exit() const {
         return ArrayMapper(this, 1, n_components(), 2 * n_components() * (n_cells_per_phase - 1), 2);
     }
 

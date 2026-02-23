@@ -26,7 +26,7 @@ class Inlet : public UnitOperationBase {
 
     const ColVector& get_V_l(realtype t, const realtype* y) const override { return V_l; }
 
-    const ArrayMapper out() const { return ArrayMapper(this, 1, n_components(), 0); }
+    const ArrayMapper exit() const { return ArrayMapper(this, 1, n_components(), 0); }
 
     RowVector getSolution(const realtype& time) const { return solution_function(time); }
 

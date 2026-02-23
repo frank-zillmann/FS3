@@ -87,8 +87,8 @@ def main():
     process = fs3.Process(component_system, [inlet, pipe, outlet])
 
     # Connect: inlet -> pipe -> outlet
-    process.add_connection(inlet.out(), pipe.in_(), flow_rate)
-    process.add_connection(pipe.out(), outlet.in_(), flow_rate)
+    process.add_connection(inlet.exit(), pipe.entry(), flow_rate)
+    process.add_connection(pipe.exit(), outlet.entry(), flow_rate)
 
     print(f"Created {process}")
 
@@ -105,7 +105,7 @@ def main():
         t_start=0.0,
         t_end=t_end,
         n_snapshots=100,
-        mapper=pipe.out(),
+        mapper=pipe.exit(),
         compute_errors=False,
     )
     observer.add_all_snapshots_to_solver(solver)

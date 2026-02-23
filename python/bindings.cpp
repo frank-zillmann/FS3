@@ -201,7 +201,7 @@ NB_MODULE(fs3, m) {
     nb::class_<Inlet, UnitOperationBase>(m, "Inlet")
         .def(nb::init<const ReactionSystem&, std::function<RowVector(const realtype&)>>(), "reaction_system"_a,
              "solution_function"_a, nb::keep_alive<1, 2>())
-        .def("out", &Inlet::out)
+        .def("exit", &Inlet::exit)
         .def("get_solution", &Inlet::getSolution, "time"_a)
         .def("__repr__", [](const Inlet&) { return "<Inlet>"; });
 
@@ -209,7 +209,7 @@ NB_MODULE(fs3, m) {
 
     nb::class_<Outlet, UnitOperationBase>(m, "Outlet")
         .def(nb::init<const ReactionSystem&>(), "reaction_system"_a, nb::keep_alive<1, 2>())
-        .def("in_", &Outlet::in)  // 'in' is a Python keyword
+        .def("entry", &Outlet::entry)
         .def("__repr__", [](const Outlet&) { return "<Outlet>"; });
 
     // ==================== Volume ====================
@@ -218,8 +218,8 @@ NB_MODULE(fs3, m) {
         .def(nb::init<const ReactionSystem&, realtype>(), "reaction_system"_a,
              "volume"_a = std::numeric_limits<realtype>::quiet_NaN(), nb::keep_alive<1, 2>())
         .def("set_const_initial_concentration", &Volume::setConstInitialConcentration, "concentrations"_a)
-        .def("in_", &Volume::in)  // 'in' is a Python keyword
-        .def("out", &Volume::out)
+        .def("entry", &Volume::entry)
+        .def("exit", &Volume::exit)
         .def("all", &Volume::all)
         .def_ro("cell_volume", &Volume::cell_volume)
         .def("__repr__", [](const Volume& v) { return "<Volume cell_volume=" + std::to_string(v.cell_volume) + ">"; });
@@ -231,8 +231,8 @@ NB_MODULE(fs3, m) {
              "reaction_system"_a, "n_cells"_a, "cross_section_area"_a, "length"_a, "flow_rate_function"_a,
              "dispersion_coefficient"_a, nb::keep_alive<1, 2>())
         .def("set_const_initial_concentration", &Pipe::setConstInitialConcentration, "concentrations"_a)
-        .def("in_", &Pipe::in)  // 'in' is a Python keyword
-        .def("out", &Pipe::out)
+        .def("entry", &Pipe::entry)
+        .def("exit", &Pipe::exit)
         .def("all", &Pipe::all)
         .def_ro("cross_section_area", &Pipe::crossSectionArea)
         .def_ro("length", &Pipe::length)
@@ -240,7 +240,8 @@ NB_MODULE(fs3, m) {
         .def_ro("cell_distance", &Pipe::cell_distance)
         .def_ro("cell_volume", &Pipe::cell_volume)
         .def("__repr__", [](const Pipe& p) {
-            return "<Pipe n_cells=" + std::to_string(p.n_cells) + " length=" + std::to_string(p.length) + ">";
+            return "<Pipe n_cells=" + std::to_string(p.n_cells) + " length=" + std::to_string(p.length) +
+                   " cross_section_area=" + std::to_string(p.crossSectionArea) + ">";
         });
 
     // ==================== RS_MagneticCaptureProcessChamber ====================
@@ -255,8 +256,8 @@ NB_MODULE(fs3, m) {
              "dispersion_coefficient_function"_a, nb::keep_alive<1, 2>())
         .def("set_const_initial_concentration", &RS_MagneticCaptureProcessChamber::setConstInitialConcentration,
              "concentrations"_a)
-        .def("in_", &RS_MagneticCaptureProcessChamber::in)
-        .def("out", &RS_MagneticCaptureProcessChamber::out)
+        .def("entry", &RS_MagneticCaptureProcessChamber::entry)
+        .def("exit", &RS_MagneticCaptureProcessChamber::exit)
         .def("liquid", &RS_MagneticCaptureProcessChamber::liquid)
         .def("slurry", &RS_MagneticCaptureProcessChamber::slurry)
         .def_ro("n_cells_per_phase", &RS_MagneticCaptureProcessChamber::n_cells_per_phase)
@@ -264,7 +265,9 @@ NB_MODULE(fs3, m) {
         .def_ro("length", &RS_MagneticCaptureProcessChamber::length)
         .def_ro("empty_porosity", &RS_MagneticCaptureProcessChamber::empty_porosity)
         .def("__repr__", [](const RS_MagneticCaptureProcessChamber& pc) {
-            return "<RS_MagneticCaptureProcessChamber n_cells=" + std::to_string(pc.n_cells) + ">";
+            return "<RS_MagneticCaptureProcessChamber n_cells=" + std::to_string(pc.n_cells) +
+                   " length=" + std::to_string(pc.length) + " cross_section_area=" + std::to_string(pc.crossSectionArea) +
+                   " empty_porosity=" + std::to_string(pc.empty_porosity) + ">";
         });
 
     // ==================== Process ====================
@@ -282,12 +285,12 @@ NB_MODULE(fs3, m) {
 
     nb::class_<SnapshotObserver>(m, "SnapshotObserver")
         .def(nb::init<realtype, const ArrayMapper&, bool>(), "time"_a, "mapper"_a, "compute_errors"_a = false)
-        .def_rw("t_desired", &SnapshotObserver::t_desired)
-        .def_rw("t_measured", &SnapshotObserver::t_measured)
+        .def_ro("t_desired", &SnapshotObserver::t_desired)
         .def_ro("mapper", &SnapshotObserver::mapper)
-        .def_rw("snapshot", &SnapshotObserver::snapshot)
-        .def_rw("compute_errors", &SnapshotObserver::compute_errors)
-        .def_rw("error", &SnapshotObserver::error)
+        .def_ro("compute_errors", &SnapshotObserver::compute_errors)
+        .def_ro("t_measured", &SnapshotObserver::t_measured)
+        .def_ro("snapshot", &SnapshotObserver::snapshot)
+        .def_ro("error", &SnapshotObserver::error)
         .def("__repr__",
              [](const SnapshotObserver& o) { return "<SnapshotObserver t=" + std::to_string(o.t_desired) + ">"; });
 

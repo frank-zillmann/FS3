@@ -312,9 +312,9 @@ class SnapshotObserver:
 
     t_desired: float
     t_measured: float
+    compute_errors: bool
     mapper: ArrayMapper
     snapshot: NDArray[np.float64]
-    compute_errors: bool
     error: float
 
     def __init__(

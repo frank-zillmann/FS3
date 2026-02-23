@@ -12,11 +12,12 @@
 class Solver;  // Forward declaration
 class SnapshotObserver {
    public:
-    realtype t_desired;
+    const realtype t_desired;
+    const ArrayMapper mapper;
+    const bool compute_errors;
+
     realtype t_measured;
-    ArrayMapper mapper;
     Array snapshot;
-    bool compute_errors;
     realtype error;
 
     SnapshotObserver(const realtype time, const ArrayMapper& mapper, bool compute_errors = false)

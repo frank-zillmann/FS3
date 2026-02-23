@@ -47,9 +47,9 @@ class Pipe : public UnitOperationBase {
 
     const ColVector& get_V_l(realtype t, const realtype* y) const override { return V_l; };
 
-    const ArrayMapper in() const { return ArrayMapper(this, 1, n_components(), 0); }
+    const ArrayMapper entry() const { return ArrayMapper(this, 1, n_components(), 0); }
 
-    const ArrayMapper out() const { return ArrayMapper(this, 1, n_components(), n_components() * (n_cells - 1)); }
+    const ArrayMapper exit() const { return ArrayMapper(this, 1, n_components(), n_components() * (n_cells - 1)); }
 
     const ArrayMapper all() const { return ArrayMapper(this, n_cells, n_components(), 0); }
 

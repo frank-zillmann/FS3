@@ -21,7 +21,7 @@ class Outlet : public UnitOperationBase {
                         const std::vector<UnitOperationBase*>& adjacentUnitOperations,
                         const std::vector<realtype>& flowRates);
 
-    const ArrayMapper in() const { return ArrayMapper(this, 1, n_components(), 0); }
+    const ArrayMapper entry() const { return ArrayMapper(this, 1, n_components(), 0); }
 
     sunindextype idx(sunindextype finiteVolumeIdx, sunindextype componentIdx, Phase phase) const override {
         throw std::logic_error("Outlet does not have finite volumes, idx should not be called.");

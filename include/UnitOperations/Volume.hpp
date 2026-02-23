@@ -50,8 +50,8 @@ class Volume : public UnitOperationBase {
         }
     };
 
-    const ArrayMapper in() const { return ArrayMapper(this, 1, n_components(), 0); }
-    const ArrayMapper out() const { return ArrayMapper(this, 1, n_components(), 0); }
+    const ArrayMapper entry() const { return ArrayMapper(this, 1, n_components(), 0); }
+    const ArrayMapper exit() const { return ArrayMapper(this, 1, n_components(), 0); }
     const ArrayMapper all() const { return ArrayMapper(this, 1, n_components(), 0); }
 
     realtype errorFunction(realtype t, const realtype* y) const override;
