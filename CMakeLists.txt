@@ -46,13 +46,12 @@ if(OUTPUT_DIR)
     message(STATUS "OUTPUT_DIR: ${OUTPUT_DIR}")
 endif()
 
-# Add -march=native to Release only (keep portability in check!)
+# Use -march=native for optimal performance on the build machine.
+# IMPORTANT: This MUST be PUBLIC because FS3 exposes Eigen types in its API. 
+# Eigen's alignment (EIGEN_DEFAULT_ALIGN_BYTES) depends on which SIMD instructions are available (on my machine: -march=native enables AVX2 → 32-byte alignment, without it SSE2 → 16-byte). 
+# If FS3 and its consumers disagree on alignment, passing Eigen objects across the boundary causes segfaults from misaligned vectorized loads/stores. 
 # Note: Disable for portable wheels with -DUSE_NATIVE_ARCH=OFF
-option(USE_NATIVE_ARCH "Use -march=native for Release builds" ON)
-if(CMAKE_BUILD_TYPE STREQUAL "Release" AND USE_NATIVE_ARCH)
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
-  message(STATUS "CMAKE_CXX_FLAGS_RELEASE: ${CMAKE_CXX_FLAGS_RELEASE}")
-endif()
+option(USE_NATIVE_ARCH "Use -march=native (PUBLIC — propagated to consumers, all build types)" ON)
 
 # ==================== Dependencies ====================
 include(FetchContent)
@@ -100,6 +99,12 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS
 list(APPEND SRC_FILES "${cnpy_SOURCE_DIR}/cnpy.cpp")
 
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
+
+# -march=native: PUBLIC so consumers always get matching Eigen alignment (see above)
+if(USE_NATIVE_ARCH)
+    target_compile_options(${PROJECT_NAME} PUBLIC -march=native)
+    message(STATUS "Using -march=native (PUBLIC)")
+endif()
 
 # Sanitizer flags: apply after target creation, use PUBLIC for propagation to applications
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

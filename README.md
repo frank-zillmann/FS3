@@ -92,7 +92,7 @@ All these options can be passed to the build script:
 - `-DLOG_ENABLED=ON|OFF` - Enable logging functionality (default: OFF)
 - `-DBENCHMARK_ENABLED=ON|OFF` - Enable benchmarking functionality (default: OFF)
 - `-DBUILD_DOCS=ON|OFF` - Generate Doxygen documentation (default: OFF)
-- `-DUSE_NATIVE_ARCH=ON|OFF` - Use `-march=native` for Release builds (default: ON, disable for portable wheels)
+- `-DUSE_NATIVE_ARCH=ON|OFF` - Use `-march=native` for optimized builds on the current machine using architecture-specific instructions (default: ON, disable for portable wheels)
 
 **Logging Configuration:**
 - `-DLOG_FIRST_N_CALLS=1000` - Log first N function calls (default: 1000)
@@ -166,7 +166,8 @@ Note: For better debugging with Eigen, I recommend to install [gdb-eigen-printer
 **Option 1: Build wheel (recommended for distribution)**
 ```bash
 pip install scikit-build-core nanobind
-pip wheel . --no-deps --wheel-dir install/dist/
+# Disable -march=native for portable wheels that run on different machines
+pip wheel . --no-deps --wheel-dir install/dist/ -Ccmake.args="-DUSE_NATIVE_ARCH=OFF"
 pip install install/dist/fs3-*.whl
 ```
 
