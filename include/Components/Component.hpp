@@ -1,86 +1,56 @@
 #ifndef COMPONENT_HPP
 #define COMPONENT_HPP
 
-#include <cassert>
-#include <iostream>
 #include <optional>
-#include <stdexcept>
 #include <string>
 
 #include "sundials/sundials_types.h"
 
 /**
- * @brief Component type classification
+ * @brief Classification of a component's physical nature.
  */
-enum class Type { NonMageneticComponent, MagneticNanoParticle, MagneticNanoParticleGroup };
+enum class Type { NonMagneticComponent, MagneticNanoParticle, MagneticNanoParticleGroup };
 
 /**
- * @brief Chemical or particulate component metadata
+ * @brief Represents a single chemical or physical species in the system.
  *
- * Holds name, charge, type and optional physical parameters (molar mass,
- * particle radius/density, magnetic saturation, activity parameters).
- * Provides a fluent builder-style API for concise setup.
+ * Stores name, charge, type, and optional physical parameters (molar mass,
+ * activity coefficients, particle geometry, magnetic saturation).
+ * Supports a fluent builder interface for convenient construction.
  */
 class Component {
    public:
     std::string name;
-    int charge = 0;                           // Charge of the component, e.g., +1 for H+, -1 for OH-
-    Type type = Type::NonMageneticComponent;  // Type of the component, default is non-magnetic
-    realtype molarMass = 1;                   // Molar mass in g/mol
-    std::optional<realtype> truesdell_jones_alpha = std::nullopt;  // ion specific parameter for the Truesdell-Jones activity model
-    std::optional<realtype> truesdell_jones_beta = std::nullopt;  // ion specific parameter for the Truesdell-Jones activity model
-    std::optional<realtype> radius = std::nullopt;                // Radius in m of particles
-    std::optional<realtype> density = std::nullopt;               // Density in kg/m^3 of particles
-    std::optional<realtype> magnetic_saturation = std::nullopt;  // Magnetic saturation of magnetic particles
+    int charge = 0;                          ///< Elementary charge (e.g. +1 for H⁺, -1 for OH⁻)
+    Type type = Type::NonMagneticComponent;  ///< Component classification
+    realtype molarMass = 1;                  ///< Molar mass [g/mol]
+    std::optional<realtype> truesdell_jones_alpha = std::nullopt;  ///< Truesdell-Jones ion-size parameter [m]
+    std::optional<realtype> truesdell_jones_beta = std::nullopt;  ///< Truesdell-Jones salting-out coefficient [m³/mol]
+    std::optional<realtype> radius = std::nullopt;                ///< Particle radius [m]
+    std::optional<realtype> density = std::nullopt;               ///< Particle density [kg/m³]
+    std::optional<realtype> magnetic_saturation = std::nullopt;   ///< Magnetic saturation [A/m]
 
-    // Constructor that acts as builder entry point
+    /// Constructs a Component with the given name; all other fields use defaults.
     explicit Component(const std::string& name) : name(name) {}
 
-    // Builder methods that return *this for chaining
-    Component& setCharge(int integer_charge) {
-        charge = integer_charge;
-        return *this;
-    }
-    Component& setType(Type type) {
-        type = type;
-        return *this;
-    }
-    Component& setMolarMass(realtype molarMass_kg_per_mol) {
-        if (molarMass_kg_per_mol <= 0.0) {
-            throw std::invalid_argument("Molar mass must be positive!");
-        }
-        molarMass = molarMass_kg_per_mol;
-        return *this;
-    }
-    Component& setTruesdellJonesParameters(realtype alpha_meter = 0.0, realtype beta_cubicmeter_per_mol = 0.0) {
-        truesdell_jones_alpha = alpha_meter;
-        truesdell_jones_beta = beta_cubicmeter_per_mol;
-        if (alpha_meter < 0.0 || beta_cubicmeter_per_mol < 0.0) {
-            throw std::invalid_argument("Truesdell-Jones parameters must be non-negative!");
-        } else if (alpha_meter == 0.0 && beta_cubicmeter_per_mol == 0.0) {
-            std::cerr << "Warning: Truesdell-Jones parameters are both zero, activity correction behaves according to "
-                         "Debye-Hückel model."
-                      << std::endl;
-        } else if (alpha_meter == 0) {
-            std::cerr
-                << "Warning: Truesdell-Jones parameter alpha_nm is zero, activity correction behaves according to "
-                   "Extended Debye-Hückel model."
-                << std::endl;
-        }
-        return *this;
-    }
-    Component& setRadius(realtype radius_m) {
-        radius = radius_m;
-        return *this;
-    }
-    Component& setDensity(realtype density_kg_per_m3) {
-        density = density_kg_per_m3;
-        return *this;
-    }
-    Component& setMagneticSaturation(realtype magnetic_saturation_A_per_m) {
-        magnetic_saturation = magnetic_saturation_A_per_m;
-        return *this;
-    }
+    Component& setCharge(int integer_charge);
+    Component& setType(Type component_type);
+
+    /// @throws std::invalid_argument if molarMass_kg_per_mol <= 0
+    Component& setMolarMass(realtype molarMass_kg_per_mol);
+
+    /// Sets both Truesdell-Jones parameters; warns if the result degenerates to Debye-Hückel.
+    /// @throws std::invalid_argument if either parameter is negative
+    Component& setTruesdellJonesParameters(realtype alpha_meter = 0.0, realtype beta_cubicmeter_per_mol = 0.0);
+
+    /// @throws std::invalid_argument if radius_m <= 0
+    Component& setRadius(realtype radius_m);
+
+    /// @throws std::invalid_argument if density_kg_per_m3 <= 0
+    Component& setDensity(realtype density_kg_per_m3);
+
+    /// @throws std::invalid_argument if magnetic_saturation_A_per_m <= 0
+    Component& setMagneticSaturation(realtype magnetic_saturation_A_per_m);
 };
 
 #endif  // COMPONENT_HPP

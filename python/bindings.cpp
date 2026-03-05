@@ -4,8 +4,8 @@
  *
  * This file provides Python bindings for the core FS3 classes:
  * - Components: Component, ComponentSystem
- * - UnitOperations: Inlet, Outlet, Volume, Pipe, RS_MagneticCaptureProcessChamber
  * - Reactions: Reaction, ReactionSystem, MassActionLaw functions, ActivityModels
+ * - UnitOperations: Inlet, Outlet, Volume, Pipe, RS_MagneticCaptureProcessChamber
  * - Process and Solver
  * - Observers: SnapshotObserver, TimeSeriesObserver
  */
@@ -47,7 +47,7 @@ NB_MODULE(fs3, m) {
     // ==================== Enums ====================
 
     nb::enum_<Type>(m, "ComponentType")
-        .value("NonMagneticComponent", Type::NonMageneticComponent)
+        .value("NonMagneticComponent", Type::NonMagneticComponent)
         .value("MagneticNanoParticle", Type::MagneticNanoParticle)
         .value("MagneticNanoParticleGroup", Type::MagneticNanoParticleGroup);
 
