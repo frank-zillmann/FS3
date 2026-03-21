@@ -3,7 +3,7 @@
  * @brief Wrapper functions for saving data to NumPy .npy and .npz files
  *
  * These functions provide a simple interface to cnpy's functionality,
- * allowing FS3 users to save simulation data in NumPy-compatible formats.
+ * allowing users to save simulation data from C++ in NumPy-compatible formats.
  */
 
 #ifndef FS3_NUMPY_IO_HPP

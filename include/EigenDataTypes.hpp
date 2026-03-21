@@ -11,11 +11,6 @@
 // Forward declaration
 class UnitOperationBase;
 
-// dynamic-sized Vector
-using Vector = Eigen::Vector<realtype, Eigen::Dynamic>;
-using VectorMap = Eigen::Map<Vector, 1>;
-using ConstVectorMap = Eigen::Map<const Vector, 1>;
-
 // dynamic-sized 2D Array, row‐major
 using Array = Eigen::Array<realtype, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
@@ -69,16 +64,6 @@ class ArrayMapper {
 
     ArrayMap operator()(realtype* data) const { return ArrayMap(data + startIdx, rows, cols, stride); }
     ConstArrayMap operator()(const realtype* data) const { return ConstArrayMap(data + startIdx, rows, cols, stride); }
-
-    // Avoid usage because capturing the function is slow
-    // ArrayMap operator()(realtype* data,
-    //                     std::function<std::size_t(const UnitOperationBase*)>& getUnitOperationStartIdx) const {
-    //     return ArrayMap(data + getUnitOperationStartIdx(unitOperation_ptr) + startIdx, rows, cols, stride);
-    // }
-    // ConstArrayMap operator()(const realtype* data,
-    //                          std::function<std::size_t(const UnitOperationBase*)>& getUnitOperationStartIdx) const {
-    //     return ConstArrayMap(data + getUnitOperationStartIdx(unitOperation_ptr) + startIdx, rows, cols, stride);
-    // }
 };
 
 // Concepts for better error messages and type constraints
