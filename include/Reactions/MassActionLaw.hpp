@@ -1,9 +1,9 @@
 #ifndef MASS_ACTION_LAW_HPP
 #define MASS_ACTION_LAW_HPP
 
+#include "EigenDataTypes.hpp"
 #include "Components/ComponentSystem.hpp"
 #include "Reactions/Reaction.hpp"
-#include "Reactions/ReactionSystem.hpp"
 
 /** \brief Standard mass action law RHS builder (forward/backward rates). */
 std::function<void(realtype t, const ConstArrayMap& concentrations, const ConstArrayMap& activities, ArrayMap& dc_dt)> massActionLaw_rhs(

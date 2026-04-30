@@ -1,10 +1,10 @@
 #ifndef PROCESS_HPP
 #define PROCESS_HPP
 
-#include <sundials/sundials_types.h>
-
 #include <memory>
 #include <vector>
+
+#include <sundials/sundials_types.h>
 
 #include "Components/ComponentSystem.hpp"
 #include "EigenDataTypes.hpp"

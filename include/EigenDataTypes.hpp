@@ -2,9 +2,6 @@
 #define EIGENDATATYPES_HPP
 
 #include <concepts>
-#include <cstddef>
-#include <functional>
-
 #include "Eigen/Dense"
 #include "sundials/sundials_types.h"
 

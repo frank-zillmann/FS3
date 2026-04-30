@@ -3,11 +3,7 @@
 
 #include <sundials/sundials_types.h>
 
-#include <cassert>
-#include <cmath>
-
 #include "Components/ComponentSystem.hpp"
-#include "EigenDataTypes.hpp"
 
 /**
  * @brief Base class for activity coefficient models

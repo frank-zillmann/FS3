@@ -1,9 +1,9 @@
 #ifndef UNIT_OPERATION_BASE_HPP
 #define UNIT_OPERATION_BASE_HPP
 
-#include <sundials/sundials_types.h>
-
 #include <cassert>
+
+#include <sundials/sundials_types.h>
 
 #include "Components/ComponentSystem.hpp"
 #include "EigenDataTypes.hpp"

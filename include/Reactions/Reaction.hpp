@@ -2,7 +2,6 @@
 #define REACTION_HPP
 
 #include <functional>
-#include <optional>
 
 #include "EigenDataTypes.hpp"
 #include "sundials/sundials_types.h"

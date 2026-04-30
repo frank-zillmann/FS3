@@ -1,10 +1,9 @@
 #ifndef PIPE_HPP
 #define PIPE_HPP
 
+#include <cassert>
 #include <functional>
 
-#include "Eigen/Core"
-#include "EigenDataTypes.hpp"
 #include "UnitOperationBase.hpp"
 
 /**

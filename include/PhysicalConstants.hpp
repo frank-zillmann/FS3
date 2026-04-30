@@ -1,6 +1,7 @@
 #ifndef PHYSICAL_CONSTANTS_HPP
 #define PHYSICAL_CONSTANTS_HPP
 
+#include "sundials/sundials_types.h"
 namespace constants {
 
 // Fundamental constants (SI units)

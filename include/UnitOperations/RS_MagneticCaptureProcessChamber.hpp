@@ -1,11 +1,9 @@
 #ifndef RS_MAGNETIC_CAPTURE_PROCESS_CHAMBER_HPP
 #define RS_MAGNETIC_CAPTURE_PROCESS_CHAMBER_HPP
 
-#include <sundials/sundials_types.h>
-
+#include <cassert>
 #include <functional>
 
-#include "EigenDataTypes.hpp"
 #include "UnitOperationBase.hpp"
 
 /**

@@ -1,11 +1,9 @@
 #include "Observers/SnapshotObserver.hpp"
 
-#include <cstddef>
 #include <iostream>
 
 #include "Solver.hpp"
 #include "UnitOperations/UnitOperationBase.hpp"
-#include "cnpy.h"
 
 void SnapshotObserver::write(realtype t, const realtype* y) {
     t_measured = t;

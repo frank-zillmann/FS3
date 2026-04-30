@@ -1,13 +1,12 @@
 #ifndef REACTION_SYSTEM_HPP
 #define REACTION_SYSTEM_HPP
 
-#include <string>
 #include <vector>
 
 #include "EigenDataTypes.hpp"
-#include "Logger.hpp"
-#include "Reactions/Reaction.hpp"
 #include "sundials/sundials_types.h"
+
+#include "Reactions/Reaction.hpp"
 
 // Forward declarations
 class ComponentSystem;
@@ -24,10 +23,7 @@ class ReactionSystem {
     ReactionSystem(const ComponentSystem& componentSystem, const ActivityModelBase& activityModel)
         : componentSystem(componentSystem), activityModel(activityModel) {}
 
-    void add(const Reaction& reaction) {
-        reactions.push_back(reaction);
-        LOG("reaction_system.log", "Added reaction No. " + std::to_string(reactions.size()) + "\n");
-    }
+    void add(const Reaction& reaction);
 
     // Expects concentrations in SI units (mol/m^3 or kg/m^3)
     template <EigenArrayLike CArrayType, WritableEigenArrayLike ActivityArrayType, WritableEigenArrayLike DcDtArrayType>

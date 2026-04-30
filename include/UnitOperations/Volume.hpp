@@ -1,12 +1,10 @@
 #ifndef VOLUME_HPP
 #define VOLUME_HPP
 
-#include <sundials/sundials_types.h>
+#include <cassert>
+#include <limits>
+#include <stdexcept>
 
-#include <functional>
-
-#include "Eigen/Core"
-#include "EigenDataTypes.hpp"
 #include "UnitOperationBase.hpp"
 
 /**

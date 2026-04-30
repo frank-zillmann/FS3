@@ -1,14 +1,9 @@
 #ifndef INLET_HPP
 #define INLET_HPP
 
-#include <sundials/sundials_types.h>
-
-#include <cmath>
 #include <functional>
-#include <limits>
-#include <vector>
+#include <stdexcept>
 
-#include "EigenDataTypes.hpp"
 #include "UnitOperationBase.hpp"
 
 /**

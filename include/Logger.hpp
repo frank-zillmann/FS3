@@ -1,8 +1,6 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-// Requires C++17 for <filesystem>
-#include <chrono>
 #include <csignal>
 #include <cstdlib>
 #include <ctime>

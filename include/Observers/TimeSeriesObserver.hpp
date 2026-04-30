@@ -1,9 +1,11 @@
 #ifndef TIMESERIESOBSERVER_HPP
 #define TIMESERIESOBSERVER_HPP
 
+#include <array>
 #include <cstddef>
-#include <cstring>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "EigenDataTypes.hpp"

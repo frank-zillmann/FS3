@@ -1,11 +1,6 @@
 #ifndef SNAPSHOTOBSERVER_HPP
 #define SNAPSHOTOBSERVER_HPP
 
-#include <cstddef>
-#include <cstring>
-#include <memory>
-#include <vector>
-
 #include "EigenDataTypes.hpp"
 #include "sundials/sundials_types.h"
 

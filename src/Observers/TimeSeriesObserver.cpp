@@ -1,6 +1,6 @@
 #include "Observers/TimeSeriesObserver.hpp"
 
-#include <cstddef>
+#include <cstring>
 #include <iostream>
 
 #include "Solver.hpp"

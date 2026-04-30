@@ -3,11 +3,12 @@
 
 #include <cstddef>
 
-#include "Components/ComponentSystem.hpp"
+#include "sundials/sundials_types.h"
+
 #include "EigenDataTypes.hpp"
+#include "Components/ComponentSystem.hpp"
 #include "Observers/TimeSeriesObserver.hpp"
 #include "Reactions/ActivityModels.hpp"
-#include "sundials/sundials_types.h"
 
 /**
  * @brief Convert TimeSeriesObserver data to pH values for a specific cell

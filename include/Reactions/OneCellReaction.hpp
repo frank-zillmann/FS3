@@ -1,8 +1,6 @@
 #ifndef ONE_CELL_REACTION_HPP
 #define ONE_CELL_REACTION_HPP
 
-#include <sundials/sundials_types.h>
-
 #include <limits>
 
 #include "EigenDataTypes.hpp"

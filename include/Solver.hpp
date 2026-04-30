@@ -1,25 +1,22 @@
 #ifndef SOLVER_HPP
 #define SOLVER_HPP
 
-#include <arkode/arkode_arkstep.h>
-#include <arkode/arkode_erkstep.h>
-#include <cvode/cvode.h>
-#include <nvector/nvector_serial.h>
-#include <sundials/sundials_nvector.h>
-#include <sundials/sundials_types.h>
-// Nonlinear solvers
-#include <sunnonlinsol/sunnonlinsol_fixedpoint.h>
-#include <sunnonlinsol/sunnonlinsol_newton.h>
-
 #include <chrono>
-#include <ctime>
 #include <limits>
 #include <memory>
 #include <unordered_map>
+#include <string>
 #include <vector>
 
+#include <arkode/arkode_arkstep.h>
+#include <arkode/arkode_erkstep.h>
+#include <cvode/cvode.h>
+#include <sundials/sundials_nvector.h>
+#include <sundials/sundials_types.h>
+#include <sunnonlinsol/sunnonlinsol_fixedpoint.h>
+#include <sunnonlinsol/sunnonlinsol_newton.h>
+
 #include "EigenDataTypes.hpp"
-#include "Logger.hpp"
 #include "Observers/SnapshotObserver.hpp"
 
 // Forward declarations
