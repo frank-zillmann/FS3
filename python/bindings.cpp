@@ -29,6 +29,7 @@
 #include "Process.hpp"
 #include "Reactions/ActivityModels.hpp"
 #include "Reactions/MassActionLaw.hpp"
+#include "Reactions/OneCellReaction.hpp"
 #include "Reactions/Reaction.hpp"
 #include "Reactions/ReactionSystem.hpp"
 #include "Solver.hpp"
@@ -173,6 +174,10 @@ NB_MODULE(fs3, m) {
     m.def("mass_action_law_inverse_rate_prediction", &massActionLaw_inverseRatePrediction, "component_system"_a,
           "reaction_str"_a, "K_eq"_a, "tau_reaction"_a, "error_component_idx"_a = -1,
           "Create an inverse rate prediction mass action law reaction");
+
+    m.def("one_cell_reaction", &oneCellReaction, "reaction_system"_a, "solution"_a, "t_duration"_a,
+        "solver_type"_a, "timeout_seconds"_a = std::numeric_limits<realtype>::infinity(),
+        "Run oneCellReaction from C++ and return (reacted_solution, error).");
 
     // ==================== ArrayMapper ====================
 

@@ -173,6 +173,16 @@ def mass_action_law_inverse_rate_prediction(
     """Create an inverse rate prediction mass action law reaction."""
     ...
 
+def one_cell_reaction(
+    reaction_system: ReactionSystem,
+    solution: NDArray[np.float64],
+    t_duration: float,
+    solver_type: SolverType,
+    timeout_seconds: float = float("inf"),
+) -> Tuple[NDArray[np.float64], float]:
+    """Run the C++ oneCellReaction helper and return (reacted_solution, error)."""
+    ...
+
 # ==================== ArrayMapper ====================
 
 class ArrayMapper:
