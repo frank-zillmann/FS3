@@ -172,8 +172,6 @@ void RS_MagneticCaptureProcessChamber::rhs(realtype t,
 
                 auto a_eff = (u_m / u_0).unaryExpr(a_eff_function);  // (1, n_MNP_components)
 
-                // dm_dt_capture_MNP_wrong = (((n_disks * u_0) / length) * ((m_l_MNP.rowwise() * a_eff).colwise() * G)).eval(); // (n_cells, n_MNP_components)
-
                 dm_dt_capture_MNP = ((flowRate * n_disks / static_cast<realtype>(n_cells_per_phase)) *
                                      (((m_l_MNP.rowwise() * a_eff).colwise() * G).colwise() * V_l.cwiseInverse()))
                                         .eval();  // (n_cells, n_MNP_components)
@@ -228,9 +226,6 @@ void RS_MagneticCaptureProcessChamber::rhs(realtype t,
 
             // NMC capture (Mechanic capture on MNPs and MNPGs neglected)
 
-            // Old only capture case version:
-            // auto dm_dt_capture_NMC = (m_l_NMC.colwise() * dV_dt_sl).colwise() / V_l;  // (n_cells, n_NMC_components)
-
             // For cells where dV_dt_sl < 0, use m_sl_NMC and V_sl instead of m_l_NMC and V_l
             auto mask_capture_uncapture = (dV_dt_sl.array() >= 0).cast<realtype>();  // (n_cells, 1), 1.0 where dV_dt_sl < 0, else 0.0
 
@@ -242,13 +237,6 @@ void RS_MagneticCaptureProcessChamber::rhs(realtype t,
                                      (V_from_NMC + 1e-20);  // (n_cells, n_NMC_components)
 
             // MNPG capture
-
-            // Old only capture case version:
-            // auto m_l_MNP_sum = m_l_MNP.rowwise().sum();                                  // (n_cells, 1)
-            // auto MNPG_MNP_ratio = m_l_MNPG.colwise() / (m_l_MNP_sum + 1e-12);            // (n_cells, n_MNPG_components)
-            // auto dm_dt_capture_MNP_sum = dm_dt_capture_MNP.rowwise().sum();              // (n_cells, 1)
-            // auto dm_dt_capture_MNPG = MNPG_MNP_ratio.colwise() * dm_dt_capture_MNP_sum;  // (n_cells, n_MNPG_components)
-
             auto m_from_MNP_sum = m_l_MNP.rowwise().sum() * mask_capture_uncapture +
                                   m_l_MNP.rowwise().sum() * (1 - mask_capture_uncapture);  // (n_cells, 1)
             auto m_from_MNPG = m_l_MNPG.colwise() * mask_capture_uncapture +

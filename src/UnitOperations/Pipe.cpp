@@ -47,16 +47,7 @@ void Pipe::rhs(realtype t,
 
     if (enable_reactions) {
         c = (1 / cell_volume) * m;
-#if LOG_ENABLED
-        if ((V_l.array() <= 0).any()) {
-            std::ostringstream oss;
-            oss << "Warning: Negative value detected in V_l in Pipe at time t = " << t << ". V_l = " << V_l.transpose()
-                << "\n";
-            LOG("unallowed_values.log", oss.str());
-        }
-#endif
         c = c.cwiseMax(0);  // Clamp negatives to 0
-        // c = c.cwiseAbs();     // Take absolute values
 
         activities.setZero();
         dc_dt.setZero();
