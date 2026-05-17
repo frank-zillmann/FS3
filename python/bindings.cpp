@@ -12,6 +12,7 @@
 
 #include <nanobind/eigen/dense.h>
 #include <nanobind/nanobind.h>
+#include <nanobind/ndarray.h>
 #include <nanobind/stl/array.h>
 #include <nanobind/stl/function.h>
 #include <nanobind/stl/optional.h>
@@ -19,6 +20,9 @@
 #include <nanobind/stl/shared_ptr.h>
 #include <nanobind/stl/string.h>
 #include <nanobind/stl/vector.h>
+
+#include <cstdint>
+#include <stdexcept>
 
 #include "Components/Component.hpp"
 #include "Components/ComponentSystem.hpp"
@@ -28,6 +32,7 @@
 #include "Observers/TimeSeriesObserver.hpp"
 #include "Process.hpp"
 #include "Reactions/ActivityModels.hpp"
+#include "Reactions/GouyChapman.hpp"
 #include "Reactions/MassActionLaw.hpp"
 #include "Reactions/OneCellReaction.hpp"
 #include "Reactions/Reaction.hpp"
@@ -144,8 +149,78 @@ NB_MODULE(fs3, m) {
     // ==================== Reaction ====================
 
     // Note: Reaction uses std::function with ArrayMap types which are complex to bind directly.
-    // We expose it but creation should go through factory functions like massActionLaw.
-    nb::class_<Reaction>(m, "Reaction").def("__repr__", [](const Reaction&) { return "<Reaction>"; });
+    // Python rhs is called with numpy arrays and must update dc_dt in place.
+    nb::class_<Reaction>(m, "Reaction")
+        .def(
+            "__init__",
+            [](Reaction& self, nb::object rhs) {
+                new (&self) Reaction([rhs](realtype t, const ConstArrayMap& concentrations,
+                                           const ConstArrayMap& activities, ArrayMap& dc_dt) {
+                    nb::gil_scoped_acquire gil;
+                    const size_t rows = static_cast<size_t>(concentrations.rows());
+                    const size_t cols = static_cast<size_t>(concentrations.cols());
+
+                    nb::ndarray<nb::numpy, realtype, nb::c_contig> c_view(const_cast<void*>(static_cast<const void*>(
+                                                                              concentrations.data())),
+                                                                          {rows, cols});
+                    nb::ndarray<nb::numpy, realtype, nb::c_contig> a_view(const_cast<void*>(static_cast<const void*>(
+                                                                              activities.data())),
+                                                                          {rows, cols});
+                    nb::ndarray<nb::numpy, realtype, nb::c_contig> dc_view(static_cast<void*>(dc_dt.data()), {rows, cols});
+
+                    rhs(t, c_view, a_view, dc_view);
+                });
+            },
+            "rhs"_a)
+        .def("__repr__", [](const Reaction&) { return "<Reaction>"; });
+
+    nb::class_<GouyChapmanModel>(m, "GouyChapmanModel")
+        .def(nb::init<const ComponentSystem&, const std::string&, const std::string&, const std::string&,
+                      const std::string&, realtype, realtype, realtype>(),
+             "component_system"_a, "mnp_oh2_plus_name"_a, "mnp_oh_name"_a, "mnp_o_minus_name"_a, "h_plus_name"_a,
+             "surface_site_density_mol_per_m2"_a, "ion_concentration_floor"_a = 1e-5, "surface_group_epsilon"_a = 1e-12,
+             nb::keep_alive<1, 2>())
+        .def("__call__",
+             [](const GouyChapmanModel& self, realtype t, nb::ndarray<nb::numpy, realtype, nb::c_contig> concentrations,
+                nb::ndarray<nb::numpy, realtype, nb::c_contig> activities,
+                nb::ndarray<nb::numpy, realtype, nb::c_contig> dc_dt) {
+                 const auto rows = static_cast<Eigen::Index>(concentrations.shape(0));
+                 const auto cols = static_cast<Eigen::Index>(concentrations.shape(1));
+
+                 ArrayMap c_map(concentrations.data(), rows, cols, PhaseStride(cols, 1));
+                 ArrayMap a_map(activities.data(), rows, cols, PhaseStride(cols, 1));
+                 ArrayMap dc_map(dc_dt.data(), rows, cols, PhaseStride(cols, 1));
+
+                 self(t, c_map, a_map, dc_map);
+             })
+        .def("__repr__", [](const GouyChapmanModel&) { return "<GouyChapmanModel>"; });
+
+    m.def(
+        "wrap_reaction",
+        [](const Reaction& base, nb::object pre, nb::object after) {
+            auto make_hook = [](nb::object hook_obj) -> ReactionHook {
+                if (hook_obj.is_none()) {
+                    return {};
+                }
+                return [hook_obj](realtype t, ArrayMap& concentrations, ArrayMap& activities, ArrayMap& dc_dt) {
+                    nb::gil_scoped_acquire gil;
+                    const size_t rows = static_cast<size_t>(concentrations.rows());
+                    const size_t cols = static_cast<size_t>(concentrations.cols());
+
+                    nb::ndarray<nb::numpy, realtype, nb::c_contig> c_view(static_cast<void*>(concentrations.data()),
+                                                                          {rows, cols});
+                    nb::ndarray<nb::numpy, realtype, nb::c_contig> a_view(static_cast<void*>(activities.data()),
+                                                                          {rows, cols});
+                    nb::ndarray<nb::numpy, realtype, nb::c_contig> dc_view(static_cast<void*>(dc_dt.data()), {rows, cols});
+
+                    hook_obj(t, c_view, a_view, dc_view);
+                };
+            };
+
+            return wrap_reaction(base, make_hook(pre), make_hook(after));
+        },
+        "base"_a, "pre"_a = nb::none(), "after"_a = nb::none(),
+        "Wrap a reaction with optional pre/after hooks. Hooks receive arrays and update dc_dt in place.");
 
     // ==================== ReactionSystem ====================
 
@@ -175,9 +250,9 @@ NB_MODULE(fs3, m) {
           "reaction_str"_a, "K_eq"_a, "tau_reaction"_a, "error_component_idx"_a = -1,
           "Create an inverse rate prediction mass action law reaction");
 
-    m.def("one_cell_reaction", &oneCellReaction, "reaction_system"_a, "solution"_a, "t_duration"_a,
-        "solver_type"_a, "timeout_seconds"_a = std::numeric_limits<realtype>::infinity(),
-        "Run oneCellReaction from C++ and return (reacted_solution, error).");
+    m.def("one_cell_reaction", &oneCellReaction, "reaction_system"_a, "solution"_a, "t_duration"_a, "solver_type"_a,
+          "timeout_seconds"_a = std::numeric_limits<realtype>::infinity(),
+          "Run oneCellReaction from C++ and return (reacted_solution, error).");
 
     // ==================== ArrayMapper ====================
 

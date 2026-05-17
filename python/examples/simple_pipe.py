@@ -48,6 +48,14 @@ def main():
         error_component_idx=1,  # Monitor H+ for pH calculation
     )
     reaction_system.add(water_reaction)
+
+    # Custom reaction: simple first-order tracer decay
+    tracer_idx = component_system.get_idx("Tracer")
+    decay_rate = 0.02
+    def tracer_decay(t: float, concentrations: np.ndarray, activities: np.ndarray, dc_dt: np.ndarray) -> None:
+        dc_dt[tracer_idx] -= decay_rate * concentrations[tracer_idx]
+
+    reaction_system.add(fs3.Reaction(tracer_decay))
     print(f"Created {reaction_system}")
 
     # ==================== Unit Operations ====================

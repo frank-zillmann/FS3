@@ -123,7 +123,33 @@ class TruesdellJonesActivityModel(ActivityModelBase):
 class Reaction:
     """Vectorized reaction wrapper."""
 
-    pass
+    def __init__(
+        self,
+        rhs: Callable[[float, NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]], None],
+    ) -> None: ...
+
+class GouyChapmanModel:
+    """Gouy-Chapman activity modifier for surface proton activities."""
+
+    def __init__(
+        self,
+        component_system: ComponentSystem,
+        mnp_oh2_plus_name: str,
+        mnp_oh_name: str,
+        mnp_o_minus_name: str,
+        h_plus_name: str,
+        surface_site_density_mol_per_m2: float,
+        ion_concentration_floor: float = 1e-5,
+        surface_group_epsilon: float = 1e-12,
+    ) -> None: ...
+
+    def __call__(
+        self,
+        t: float,
+        concentrations: NDArray[np.float64],
+        activities: NDArray[np.float64],
+        dc_dt: NDArray[np.float64],
+    ) -> None: ...
 
 class ReactionSystem:
     """Collection of reactions with an activity model."""
@@ -171,6 +197,14 @@ def mass_action_law_inverse_rate_prediction(
     error_component_idx: int = -1,
 ) -> Reaction:
     """Create an inverse rate prediction mass action law reaction."""
+    ...
+
+def wrap_reaction(
+    base: Reaction,
+    pre: Optional[Callable[[float, NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]], None]] = None,
+    after: Optional[Callable[[float, NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]], None]] = None,
+) -> Reaction:
+    """Wrap a reaction with optional pre/after hooks."""
     ...
 
 def one_cell_reaction(
