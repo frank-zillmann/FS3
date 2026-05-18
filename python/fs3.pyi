@@ -199,6 +199,20 @@ def mass_action_law_inverse_rate_prediction(
     """Create an inverse rate prediction mass action law reaction."""
     ...
 
+def langmuir_binding_reaction(
+    idx_h_plus: int,
+    idx_mnp1: int,
+    idx_mnp10: int,
+    idx_mnp_higg: int,
+    idx_higg: int,
+    molar_mass_higg: float,
+    k_b_from_pH: Callable[[float], float],
+    q_max_from_pH: Callable[[float], float],
+    tau_reaction: float,
+) -> Reaction:
+    """Create a Langmuir binding reaction with pH-dependent callbacks for K_B and q_max."""
+    ...
+
 def wrap_reaction(
     base: Reaction,
     pre: Optional[Callable[[float, NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]], None]] = None,

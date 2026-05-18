@@ -33,6 +33,7 @@
 #include "Process.hpp"
 #include "Reactions/ActivityModels.hpp"
 #include "Reactions/GouyChapman.hpp"
+#include "Reactions/Langmuir.hpp"
 #include "Reactions/MassActionLaw.hpp"
 #include "Reactions/OneCellReaction.hpp"
 #include "Reactions/Reaction.hpp"
@@ -249,6 +250,10 @@ NB_MODULE(fs3, m) {
     m.def("mass_action_law_inverse_rate_prediction", &massActionLaw_inverseRatePrediction, "component_system"_a,
           "reaction_str"_a, "K_eq"_a, "tau_reaction"_a, "error_component_idx"_a = -1,
           "Create an inverse rate prediction mass action law reaction");
+
+    m.def("langmuir_binding_reaction", &langmuir_binding_reaction, "idx_h_plus"_a, "idx_mnp1"_a, "idx_mnp10"_a,
+          "idx_mnp_higg"_a, "idx_higg"_a, "molar_mass_higg"_a, "k_b_from_pH"_a, "q_max_from_pH"_a, "tau_reaction"_a,
+          "Create a Langmuir binding reaction with pH-dependent callbacks for K_B and q_max.");
 
     m.def("one_cell_reaction", &oneCellReaction, "reaction_system"_a, "solution"_a, "t_duration"_a, "solver_type"_a,
           "timeout_seconds"_a = std::numeric_limits<realtype>::infinity(),
